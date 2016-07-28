@@ -24,6 +24,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.pokemongomap.helpers.BitmapHelper;
+import com.pokemongomap.helpers.PokemonHelper;
+import com.pokemongomap.pokemon.PokemonData;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -98,6 +101,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         result.setResultCallback(this);
 
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+
     }
 
     @Override

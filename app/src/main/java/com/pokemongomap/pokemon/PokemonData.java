@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.pokemongomap.pokemongomap.MapFragment;
 
@@ -36,10 +38,10 @@ public final class PokemonData {
 
     private static final String SERVER_IP = "89.163.173.74:5000/raw_data";
 
-    private static volatile List<Pokemon> mPokemon;
+    private static volatile Queue<Pokemon> mPokemon;
 
     public static void init() {
-        mPokemon = new ArrayList<>();
+        mPokemon = new ConcurrentLinkedQueue<>();
         Timer timer = new Timer();
         PokemonDataTask task = mPokemonData.new PokemonDataTask();
         timer.schedule(task, 0, SLEEP_TIME);
@@ -49,7 +51,7 @@ public final class PokemonData {
         return mPokemonData;
     }
 
-    public static List<Pokemon> getPokemon() {
+    public static Queue<Pokemon> getPokemon() {
         return mPokemon;
     }
 
@@ -85,16 +87,18 @@ public final class PokemonData {
             // clean up
             Date currentTime = new Date();
             Iterator<Pokemon> it = mPokemon.iterator();
-            while (it.hasNext()) {
-                Pokemon pokemon = it.next();
-                if (pokemon.getDisappearTime().before(currentTime)) {
-                    try {
-                        MapFragment.getInstance().removeOverlay(pokemon.getLocation());
-                    } catch (NullPointerException e) {
-                        // MapFragment not active
-                        // ignore
+            synchronized (mPokemon.iterator()) {
+                while (it.hasNext()) {
+                    Pokemon pokemon = it.next();
+                    if (pokemon.getDisappearTime().before(currentTime)) {
+                        try {
+                            MapFragment.getInstance().removeOverlay(pokemon);
+                        } catch (NullPointerException e) {
+                            // MapFragment not active
+                            // ignore
+                        }
+                        it.remove();
                     }
-                    it.remove();
                 }
             }
 

@@ -11,16 +11,16 @@ public abstract class BitmapHelper {
 
     private static final float TEXT_SIZE = 18.f;
 
-    private static Map<Integer, Bitmap> mBitmaps;
+    private static Map<Long, Bitmap> mBitmaps;
 
     public static void init() {
         mBitmaps = new HashMap<>();
-        for (int i = 0; i < 15*60; i++) {
+        for (long i = 0; i < 15*60; i++) {
             mBitmaps.put(i, textAsBitmap(i + ""));
         }
     }
 
-    public static Bitmap getBitmap(int i) {
+    public static Bitmap getBitmap(long i) {
         return mBitmaps.get(i);
     }
 

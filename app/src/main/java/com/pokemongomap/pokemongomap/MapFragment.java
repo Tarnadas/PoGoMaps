@@ -35,7 +35,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RunnableFuture;
 
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraChangeListener {
@@ -44,8 +47,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static final float ZOOM_MULT = 20.f;
     private static final float ZOOM_MIN = 18.f;
     private static final float ZOOM_LEVEL_TIMER = 15.f;
-
-    private static final String SERVICE_KEY = "service";
+    private static final float MARKER_OFFSET = -1.5f;
 
     private static MapFragment mMapFragment;
 
@@ -56,9 +58,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private GoogleMap mMap;
     private float currentZoom = -1;
     private LatLng currentTarget = new LatLng(0,0);
+    private Timer mTimer;
 
     private Map<LatLng, GroundOverlay> mOverlays;
-    private Map<GroundOverlay, Marker> mCountdowns;
+    private Map<Pokemon, Marker> mCountdowns;
+
+    private List<Pokemon> mVisibles;
 
     public MapFragment() {
         // Required empty public constructor
@@ -90,6 +95,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMapFragment = this;
         mOverlays = Collections.synchronizedMap(new HashMap<LatLng, GroundOverlay>());
         mCountdowns = new ConcurrentHashMap<>();
+        mVisibles = new ArrayList<>();
     }
 
     @Override
@@ -104,11 +110,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onResume() {
         super.onResume();
+        mTimer = new Timer();
+        TimerUpdateTask task = new TimerUpdateTask();
+        mTimer.schedule(task, 1000, 1000);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        mTimer.cancel();
     }
 
     @Override
@@ -148,61 +158,82 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onCameraChange(CameraPosition pos) {
         if (pos.zoom != currentZoom || pos.target != currentTarget){
             currentZoom = pos.zoom;
+            currentTarget = pos.target;
             float dim = Math.max((1 + mMap.getMaxZoomLevel() - (currentZoom * ZOOM_SHRINK)) * ZOOM_MULT, ZOOM_MIN);
+            double offset = MARKER_OFFSET * (180/Math.PI)*(dim/(6378137*2));
+            //lon = lon0 + (180/pi)*(dx/6378137)/cos(lat0);
+            //double offset = MARKER_OFFSET * (1+mMap.getMaxZoomLevel() - currentZoom);
             Date currentTime = new Date();
 
             LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-            List<Pokemon> pokemonList = new ArrayList<>(PokemonData.getPokemon());
-            for (Pokemon pokemon : pokemonList) {
-                LatLng loc = pokemon.getLocation();
-                int seconds = (int) (pokemon.getDisappearTime().getTime() - currentTime.getTime())/1000;
-                if (seconds < 0) {
-                    break;
-                }
-                if (bounds.contains(loc)) {
-                    // Pokemon in map bounds
-                    GroundOverlay overlay = mOverlays.get(loc);
-                    if (overlay != null) {
-                        overlay.setDimensions(dim);
-                        Marker timer = mCountdowns.get(overlay);
-                        if (!overlay.isVisible()) {
-                            overlay.setVisible(true);
-                        }
-                        if (currentZoom >= ZOOM_LEVEL_TIMER && !timer.isVisible()) {
-                            timer.setVisible(true);
-                        } else if (currentZoom < ZOOM_LEVEL_TIMER && timer.isVisible()) {
-                            timer.setVisible(false);
-                        }
-                    } else {
-                        if (!mOverlays.keySet().contains(loc)) {
-                            GroundOverlayOptions options = new GroundOverlayOptions().position(loc, dim).image(BitmapDescriptorFactory.fromResource(pokemon.getResource()))
-                                    .transparency(0);
-                            overlay = mMap.addGroundOverlay(options);
-                            mOverlays.put(loc, overlay);
-                            Bitmap text = BitmapHelper.getBitmap(seconds);
-                            MarkerOptions markerOptions = new MarkerOptions().position(loc).icon(BitmapDescriptorFactory.fromBitmap(text));
-                            mCountdowns.put(overlay, mMap.addMarker(markerOptions));
-                        }
+            Iterator<Pokemon> it = PokemonData.getPokemon().iterator();
+            synchronized (PokemonData.getPokemon().iterator()) {
+                while (it.hasNext()) {
+                    Pokemon pokemon = it.next();
+                    LatLng loc = pokemon.getLocation();
+                    long seconds = (pokemon.getDisappearTime().getTime() - currentTime.getTime())/1000;
+                    if (seconds < 0) {
+                        continue;
                     }
-                } else {
-                    // Pokemon not in map bounds
-                    GroundOverlay overlay = mOverlays.get(loc);
-                    if (overlay != null) {
-                        Marker timer = mCountdowns.get(overlay);
-                        if (overlay.isVisible()) {
-                            overlay.setVisible(false);
-                            timer.setVisible(false);
+
+                    if (bounds.contains(loc)) {
+                        // Pokemon in map bounds
+                        GroundOverlay overlay = mOverlays.get(loc);
+                        if (overlay != null) {
+                            overlay.setDimensions(dim);
+                            Marker timer = mCountdowns.get(pokemon);
+                            LatLng newLoc = new LatLng(loc.latitude + offset, loc.longitude);
+                            timer.setPosition(newLoc);
+                            if (!overlay.isVisible()) {
+                                overlay.setVisible(true);
+                            }
+                            if (currentZoom >= ZOOM_LEVEL_TIMER && !timer.isVisible()) {
+                                timer.setVisible(true);
+                                mVisibles.add(pokemon);
+                            } else if (currentZoom < ZOOM_LEVEL_TIMER && timer.isVisible()) {
+                                timer.setVisible(false);
+                                mVisibles.remove(pokemon);
+                            }
+                        } else {
+                            if (!mOverlays.keySet().contains(loc)) {
+                                GroundOverlayOptions options = new GroundOverlayOptions().position(loc, dim).image(BitmapDescriptorFactory.fromResource(pokemon.getResource()))
+                                        .transparency(0);
+                                overlay = mMap.addGroundOverlay(options);
+                                mOverlays.put(loc, overlay);
+                                Bitmap text = BitmapHelper.getBitmap(seconds);
+                                LatLng markerLoc = new LatLng(loc.latitude + offset, loc.longitude);
+                                MarkerOptions markerOptions = new MarkerOptions().position(markerLoc).
+                                        icon(BitmapDescriptorFactory.fromBitmap(text));
+                                Marker timer = mMap.addMarker(markerOptions);
+                                mCountdowns.put(pokemon, timer);
+                                if (currentZoom >= ZOOM_LEVEL_TIMER) {
+                                    mVisibles.add(pokemon);
+                                } else if (currentZoom < ZOOM_LEVEL_TIMER) {
+                                    timer.setVisible(false);
+                                }
+                            }
                         }
                     } else {
-                        Log.d("","");
+                        // Pokemon not in map bounds
+                        GroundOverlay overlay = mOverlays.get(loc);
+                        if (overlay != null) {
+                            Marker timer = mCountdowns.get(pokemon);
+                            if (overlay.isVisible()) {
+                                overlay.setVisible(false);
+                                timer.setVisible(false);
+                                mVisibles.remove(pokemon);
+                            }
+                        } else {
+                            Log.d("","");
+                        }
                     }
                 }
             }
         }
     }
 
-    public void removeOverlay(LatLng loc) {
-        final GroundOverlay overlay = mOverlays.get(loc);
+    public void removeOverlay(final Pokemon pokemon) {
+        final GroundOverlay overlay = mOverlays.get(pokemon.getLocation());
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -210,7 +241,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     mOverlays.remove(overlay.getPosition());
                     overlay.remove();
 
-                    Marker timer = mCountdowns.get(overlay);
+                    Marker timer = mCountdowns.get(pokemon);
                     timer.remove();
                     mCountdowns.remove(overlay);
                 } catch (NullPointerException e) {
@@ -222,5 +253,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
+    }
+
+    private class TimerUpdateTask extends TimerTask {
+        @Override
+        public void run() {
+            for (Pokemon pokemon : mVisibles) {
+                final Marker marker = mCountdowns.get(pokemon);
+                Date currentTime = new Date();
+                long seconds = (pokemon.getDisappearTime().getTime() - currentTime.getTime())/1000;
+                if (seconds < 0) {
+                    continue;
+                }
+                final Bitmap text = BitmapHelper.getBitmap(seconds);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(text));
+                    }
+                });
+            }
+        }
     }
 }

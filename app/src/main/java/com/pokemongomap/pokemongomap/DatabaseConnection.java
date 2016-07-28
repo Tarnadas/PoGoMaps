@@ -44,19 +44,17 @@ public final class DatabaseConnection {
     }
 
     public String getLocationAsString() {
-        SQLiteDB mDbHelper = new SQLiteDB(mContext);
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
                 LocationContract.LocationEntry.COLUMN_NAME
         };
 
+        String[] loc;
         Cursor c = mDatabase.query(LocationContract.LocationEntry.TABLE_NAME, projection, null, null, null, null, null);
 
         c.moveToFirst();
-        String loc[] = c.getString(c.getColumnIndexOrThrow(LocationContract.LocationEntry.COLUMN_NAME)).split(" ");
+        loc = c.getString(c.getColumnIndexOrThrow(LocationContract.LocationEntry.COLUMN_NAME)).split(" ");
         return Double.parseDouble(loc[0]) + "_" + Double.parseDouble(loc[1]);
     }
 
