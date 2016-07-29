@@ -1,6 +1,7 @@
 package com.pokemongomap.pokemon;
 
 
+import android.database.CursorIndexOutOfBoundsException;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -19,10 +20,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -67,12 +66,28 @@ public final class PokemonData {
             HttpURLConnection urlConnection = null;
             String response = "";
             try {
-                String urlString = "http://" + SERVER_IP + "?location=" + DatabaseConnection.getInstance().getLocationAsString();
-                url = new URL(urlString);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                response = convertStreamToString(in);
+                synchronized (DatabaseConnection.getInstance()) {
+                    try {
+                        String urlString = "http://" + SERVER_IP + "?location=" + DatabaseConnection.getInstance().getLocationAsString();
+                        url = new URL(urlString);
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                        urlConnection.setRequestMethod("GET");
+                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                        response = convertStreamToString(in);
+                    } catch (CursorIndexOutOfBoundsException e) {
+                        try {
+                            DatabaseConnection.getInstance().wait();
+                        } catch (InterruptedException e1) {
+                            // ignore
+                        }
+                        String urlString = "http://" + SERVER_IP + "?location=" + DatabaseConnection.getInstance().getLocationAsString();
+                        url = new URL(urlString);
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                        urlConnection.setRequestMethod("GET");
+                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                        response = convertStreamToString(in);
+                    }
+                }
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();

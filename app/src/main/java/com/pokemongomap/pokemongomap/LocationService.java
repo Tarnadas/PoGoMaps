@@ -1,17 +1,16 @@
 package com.pokemongomap.pokemongomap;
 
-import android.app.Service;
-import android.content.ContentValues;
+import android.app.IntentService;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,21 +23,26 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.pokemongomap.helpers.BitmapHelper;
-import com.pokemongomap.helpers.PokemonHelper;
-import com.pokemongomap.pokemon.PokemonData;
+import com.pokemongomap.helpers.Constants;
 
 import java.io.Serializable;
 import java.util.Date;
 
-public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+public class LocationService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, ResultCallback<LocationSettingsResult>, Serializable {
 
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
-    private Date mLastUpdateTime;
 
     private final IBinder mBinder = new LocationBinder();
+
+    public LocationService() {
+        super("LocationService");
+    }
+
+    public LocationService(String name) {
+        super(name);
+    }
 
     public class LocationBinder extends Binder {
         LocationService getService() {
@@ -52,10 +56,38 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     }
 
     @Override
+    protected void onHandleIntent(Intent intent) {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+            mGoogleApiClient.connect();
+        }
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //return;
+        }
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mCurrentLocation == null) {
+            synchronized (DatabaseConnection.getInstance()) {
+                try {
+                    DatabaseConnection.getInstance().wait();
+                    mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+
+        Intent localIntent = new Intent(Constants.LOCATION_BROADCAST).putExtra(Constants.LOCATION_STATUS, mCurrentLocation.getLatitude() + " " + mCurrentLocation.getLongitude());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        mLastUpdateTime = new Date();
-        saveLocation(mCurrentLocation);
+        DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
     }
 
     @Override
@@ -66,6 +98,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onCreate() {
+        super.onCreate();
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -88,8 +121,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             return;
         }
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        mLastUpdateTime = new Date();
-        saveLocation(mCurrentLocation);
+        DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
 
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
@@ -137,16 +169,6 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                 break;
         }
-    }
-
-    public void saveLocation(Location location) {
-        SQLiteDB mDbHelper = new SQLiteDB(this);
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(LocationContract.LocationEntry.COLUMN_NAME, location.getLatitude() + " " + location.getLongitude());
-
-        db.insert(LocationContract.LocationEntry.TABLE_NAME, null, values);
     }
 
 }

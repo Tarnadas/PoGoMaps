@@ -1,9 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'PoGo Maps'
+            keyPassword 'c0d3g3n3r4ti0nSCAD'
+            storeFile file('C:/Users/Mario/key/pogomaps.jks')
+            storePassword 'c0d3g3n3r4ti0nSCAD'
+        }
+    }
     compileSdkVersion 24
     buildToolsVersion "23.0.3"
-
     defaultConfig {
         applicationId "com.pokemongomap.pokemongomap"
         minSdkVersion 14
@@ -16,6 +23,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false
+            signingConfig signingConfigs.config
+            renderscriptDebuggable false
+            zipAlignEnabled true
         }
     }
     aaptOptions {
@@ -24,7 +35,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.google.android.gms:play-services:9.2.1'

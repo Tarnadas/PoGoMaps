@@ -1,15 +1,21 @@
 package com.pokemongomap.pokemongomap;
 
+import android.*;
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,27 +25,71 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.pokemongomap.helpers.BitmapHelper;
+import com.pokemongomap.helpers.Constants;
+import com.pokemongomap.permissions.EasyPermissions;
 import com.pokemongomap.pokemon.PokemonData;
 import com.pokemongomap.helpers.PokemonHelper;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MapFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, MapFragment.OnFragmentInteractionListener, ActivityCompat.OnRequestPermissionsResultCallback{
 
 
     LocationService mService;
     boolean mBound = false;
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        String[] perms = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_CONTACTS };
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            // Have permissions, do the thing!
+            //Toast.makeText(this, "TODO: Location and Contacts things", Toast.LENGTH_LONG).show();
+        } else {
+            // Ask for both permissions
+            EasyPermissions.requestPermissions(this, getString(R.string.rationale_location_contacts),
+                    RC_LOCATION_CONTACTS_PERM, perms);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constants.PERMISSION_REQUEST_CODE);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISSION_REQUEST_CODE);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, Constants.PERMISSION_REQUEST_CODE);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_WIFI_STATE}, Constants.PERMISSION_REQUEST_CODE);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET}, Constants.PERMISSION_REQUEST_CODE);
+        }
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.PERMISSION_REQUEST_CODE);
+            }
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.PERMISSION_REQUEST_CODE);
+            }
+        }
+
         DatabaseConnection.init(this);
+
+        Intent intent = new Intent(this, LocationService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
         PokemonHelper.init();
         PokemonData.init();
         BitmapHelper.init();
         super.onCreate(savedInstanceState);
-
-        Intent intent = new Intent(this, LocationService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
 
         setContentView(R.layout.activity_main);

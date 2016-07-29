@@ -1,12 +1,14 @@
 package com.pokemongomap.pokemongomap;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pokemongomap.helpers.BitmapHelper;
+import com.pokemongomap.helpers.Constants;
 import com.pokemongomap.pokemon.Pokemon;
 import com.pokemongomap.pokemon.PokemonData;
 
@@ -38,10 +41,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.RunnableFuture;
 
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraChangeListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener {
 
     private static final float ZOOM_SHRINK = 1.2f;
     private static final float ZOOM_MULT = 20.f;
@@ -76,6 +78,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     public static MapFragment getInstance() {
         return mMapFragment;
+    }
+
+    public GoogleMap getMap() {
+        return mMap;
     }
 
     @Override
@@ -136,13 +142,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMarkerClickListener(this);
 
-        LatLng loc = DatabaseConnection.getInstance().getLocationAsync();
-        mMap.addMarker(new MarkerOptions().position(loc).title("Standort"));
+        IntentFilter statusIntentFilter = new IntentFilter(Constants.LOCATION_BROADCAST);
+        ResponseReceiver responseReceiver = new ResponseReceiver();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(responseReceiver, statusIntentFilter);
+
         if (appStart) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
+            Intent serviceIntent = new Intent(getActivity(), LocationService.class);
+            getActivity().startService(serviceIntent);
             appStart = false;
         } else {
+            LatLng loc = DatabaseConnection.getInstance().getLocation();
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
         }
         mMap.setOnCameraChangeListener(this);
@@ -161,8 +172,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             currentTarget = pos.target;
             float dim = Math.max((1 + mMap.getMaxZoomLevel() - (currentZoom * ZOOM_SHRINK)) * ZOOM_MULT, ZOOM_MIN);
             double offset = MARKER_OFFSET * (180/Math.PI)*(dim/(6378137*2));
-            //lon = lon0 + (180/pi)*(dx/6378137)/cos(lat0);
-            //double offset = MARKER_OFFSET * (1+mMap.getMaxZoomLevel() - currentZoom);
             Date currentTime = new Date();
 
             LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
@@ -203,7 +212,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 Bitmap text = BitmapHelper.getBitmap(seconds);
                                 LatLng markerLoc = new LatLng(loc.latitude + offset, loc.longitude);
                                 MarkerOptions markerOptions = new MarkerOptions().position(markerLoc).
-                                        icon(BitmapDescriptorFactory.fromBitmap(text));
+                                        icon(BitmapDescriptorFactory.fromBitmap(text)).draggable(false);
                                 Marker timer = mMap.addMarker(markerOptions);
                                 mCountdowns.put(pokemon, timer);
                                 if (currentZoom >= ZOOM_LEVEL_TIMER) {
@@ -251,6 +260,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         });
     }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
+
     public interface OnFragmentInteractionListener {
         void onFragmentInteraction(Uri uri);
     }
@@ -263,6 +277,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 Date currentTime = new Date();
                 long seconds = (pokemon.getDisappearTime().getTime() - currentTime.getTime())/1000;
                 if (seconds < 0) {
+                    removeOverlay(pokemon);
                     continue;
                 }
                 final Bitmap text = BitmapHelper.getBitmap(seconds);
@@ -273,6 +288,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                     }
                 });
             }
+        }
+    }
+
+    private class ResponseReceiver extends BroadcastReceiver {
+        // Prevents instantiation
+        public ResponseReceiver() {
+        }
+        // Called when the BroadcastReceiver gets an Intent it's registered to receive
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String locString[] = intent.getExtras().getString(Constants.LOCATION_STATUS).split(" ");
+            LatLng loc = new LatLng(Double.parseDouble(locString[0]), Double.parseDouble(locString[1]));
+
+            GoogleMap map = MapFragment.getInstance().getMap();
+            map.addMarker(new MarkerOptions().position(loc).title("Standort"));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
         }
     }
 }

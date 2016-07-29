@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">PokemonGoMap</string>
-    <string name="title_activity_main">Pokemon Go Map</string>
+    <string name="app_name">PoGo Maps</string>
+    <string name="title_activity_main">PoGo Maps</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
