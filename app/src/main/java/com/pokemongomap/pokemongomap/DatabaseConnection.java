@@ -3,6 +3,7 @@ package com.pokemongomap.pokemongomap;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 
@@ -38,7 +39,7 @@ public final class DatabaseConnection {
         }
     }
 
-    public LatLng getLocation() {
+    public LatLng getLocation() throws CursorIndexOutOfBoundsException {
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.

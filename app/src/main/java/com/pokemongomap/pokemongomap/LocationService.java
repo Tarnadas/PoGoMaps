@@ -23,10 +23,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.model.LatLng;
 import com.pokemongomap.helpers.Constants;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class LocationService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, ResultCallback<LocationSettingsResult>, Serializable {
@@ -79,6 +79,7 @@ public class LocationService extends IntentService implements GoogleApiClient.Co
                 }
             }
         }
+        DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
 
         Intent localIntent = new Intent(Constants.LOCATION_BROADCAST).putExtra(Constants.LOCATION_STATUS, mCurrentLocation.getLatitude() + " " + mCurrentLocation.getLongitude());
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
@@ -87,7 +88,10 @@ public class LocationService extends IntentService implements GoogleApiClient.Co
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
+        DatabaseConnection.getInstance().saveLocation(location);
+
+        Intent localIntent = new Intent(Constants.LOCATION_BROADCAST).putExtra(Constants.LOCATION_STATUS, mCurrentLocation.getLatitude() + " " + mCurrentLocation.getLongitude());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
     @Override
@@ -121,7 +125,9 @@ public class LocationService extends IntentService implements GoogleApiClient.Co
             return;
         }
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
+        if (mCurrentLocation != null) {
+            DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
+        }
 
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);

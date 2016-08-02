@@ -2,9 +2,17 @@ package com.pokemongomap.pokemon;
 
 
 import android.database.CursorIndexOutOfBoundsException;
+import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.pokemongomap.helpers.BitmapHelper;
 import com.pokemongomap.helpers.PokemonHelper;
 import com.pokemongomap.pokemongomap.DatabaseConnection;
 
@@ -31,7 +39,8 @@ import com.pokemongomap.pokemongomap.MapFragment;
 
 public final class PokemonData {
 
-    private static final long SLEEP_TIME = 5000;
+    private static final long SLEEP_TIME_FETCH = 5000;
+    private static final long SLEEP_TIME_UPDATE = 1000;
 
     private static PokemonData mPokemonData = new PokemonData();
 
@@ -41,9 +50,12 @@ public final class PokemonData {
 
     public static void init() {
         mPokemon = new ConcurrentLinkedQueue<>();
-        Timer timer = new Timer();
-        PokemonDataTask task = mPokemonData.new PokemonDataTask();
-        timer.schedule(task, 0, SLEEP_TIME);
+        Timer timerFetch = new Timer();
+        PokemonDataFetchTask fetchTask = mPokemonData.new PokemonDataFetchTask();
+        timerFetch.schedule(fetchTask, 0, SLEEP_TIME_FETCH);
+        Timer timerUpdate = new Timer();
+        PokemonDataUpdateTask udpateTask = mPokemonData.new PokemonDataUpdateTask();
+        timerUpdate.schedule(udpateTask, 0, SLEEP_TIME_UPDATE);
     }
 
     public static PokemonData getInstance() {
@@ -57,7 +69,32 @@ public final class PokemonData {
     private PokemonData() {
     }
 
-    private class PokemonDataTask extends TimerTask {
+    private class PokemonDataUpdateTask extends TimerTask {
+        @Override
+        public void run() {
+
+            Date currentTime = new Date();
+            Iterator<Pokemon> it = mPokemon.iterator();
+            MapFragment fragment = MapFragment.getInstance();
+            synchronized (mPokemon.iterator()) {
+                while (it.hasNext()) {
+                    Pokemon pokemon = it.next();
+                    if (pokemon.getDisappearTime().before(currentTime)) {
+                        if (fragment != null) {
+                            fragment.removeOverlay(pokemon);
+                        }
+                        it.remove();
+                    } else if (fragment != null) {
+                        int seconds = (int) (pokemon.getDisappearTime().getTime() - currentTime.getTime())/1000;
+                        float dim = fragment.getDim();
+                        fragment.updatePokemon(pokemon, seconds, dim, fragment.getOffset(dim));
+                    }
+                }
+            }
+        }
+    }
+
+    private class PokemonDataFetchTask extends TimerTask {
 
         @Override
         public void run() {
@@ -99,24 +136,6 @@ public final class PokemonData {
                 if (urlConnection != null) urlConnection.disconnect();
             }
 
-            // clean up
-            Date currentTime = new Date();
-            Iterator<Pokemon> it = mPokemon.iterator();
-            synchronized (mPokemon.iterator()) {
-                while (it.hasNext()) {
-                    Pokemon pokemon = it.next();
-                    if (pokemon.getDisappearTime().before(currentTime)) {
-                        try {
-                            MapFragment.getInstance().removeOverlay(pokemon);
-                        } catch (NullPointerException e) {
-                            // MapFragment not active
-                            // ignore
-                        }
-                        it.remove();
-                    }
-                }
-            }
-
             try {
                 JSONObject jObject = new JSONObject(response);
                 JSONArray jPokemon = jObject.getJSONArray("pokemons");
@@ -143,11 +162,6 @@ public final class PokemonData {
 
             } catch (JSONException e) {
                 Log.e("JSONException", "Error: " + e.toString());
-            }
-            try {
-                Thread.sleep(SLEEP_TIME);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }

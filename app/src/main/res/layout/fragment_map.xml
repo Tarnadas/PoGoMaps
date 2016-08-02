@@ -1,5 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,5 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollingCache="false" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/jump_to_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="50px"
+        android:layout_marginRight="50px"
+        android:src="@drawable/trainer"
+        app:backgroundTint="@color/colorPrimaryDark"/>
 
 </FrameLayout>

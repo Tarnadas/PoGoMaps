@@ -4,7 +4,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.pokemongomap.pokemon.Pokemon;
 import com.pokemongomap.pokemon.gen1.*;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 

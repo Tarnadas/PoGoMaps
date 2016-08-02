@@ -3,6 +3,7 @@ package com.pokemongomap.pokemon;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public abstract class Pokemon {
@@ -47,6 +48,16 @@ public abstract class Pokemon {
         } catch (ClassCastException e) {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(mDisappearTime);
+        int hours = cal.get(Calendar.HOUR_OF_DAY) << 12;
+        int minutes = cal.get(Calendar.MINUTE) << 6;
+        int seconds = cal.get(Calendar.SECOND);
+        return (this.mId << 17) + hours + minutes + seconds;
     }
 
 }
