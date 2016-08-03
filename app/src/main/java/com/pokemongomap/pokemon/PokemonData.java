@@ -2,17 +2,9 @@ package com.pokemongomap.pokemon;
 
 
 import android.database.CursorIndexOutOfBoundsException;
-import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.GroundOverlay;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.pokemongomap.helpers.BitmapHelper;
 import com.pokemongomap.helpers.PokemonHelper;
 import com.pokemongomap.pokemongomap.DatabaseConnection;
 
@@ -20,22 +12,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Queue;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.pokemongomap.pokemongomap.MapFragment;
+import com.pokemongomap.pokemongomap.RemoteDatabaseConnection;
 
 public final class PokemonData {
 
@@ -74,6 +68,7 @@ public final class PokemonData {
         public void run() {
 
             Date currentTime = new Date();
+
             Iterator<Pokemon> it = mPokemon.iterator();
             MapFragment fragment = MapFragment.getInstance();
             synchronized (mPokemon.iterator()) {
@@ -99,41 +94,20 @@ public final class PokemonData {
         @Override
         public void run() {
 
-            URL url;
-            HttpURLConnection urlConnection = null;
-            String response = "";
-            try {
-                synchronized (DatabaseConnection.getInstance()) {
+            String response;
+            synchronized (DatabaseConnection.getInstance()) {
+                LatLng loc;
+                try {
+                    loc = DatabaseConnection.getInstance().getLocation();
+                } catch (CursorIndexOutOfBoundsException e) {
                     try {
-                        String urlString = "http://" + SERVER_IP + "?location=" + DatabaseConnection.getInstance().getLocationAsString();
-                        url = new URL(urlString);
-                        urlConnection = (HttpURLConnection) url.openConnection();
-                        urlConnection.setRequestMethod("GET");
-                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                        response = convertStreamToString(in);
-                    } catch (CursorIndexOutOfBoundsException e) {
-                        try {
-                            DatabaseConnection.getInstance().wait();
-                        } catch (InterruptedException e1) {
-                            // ignore
-                        }
-                        String urlString = "http://" + SERVER_IP + "?location=" + DatabaseConnection.getInstance().getLocationAsString();
-                        url = new URL(urlString);
-                        urlConnection = (HttpURLConnection) url.openConnection();
-                        urlConnection.setRequestMethod("GET");
-                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                        response = convertStreamToString(in);
+                        DatabaseConnection.getInstance().wait();
+                    } catch (InterruptedException e1) {
+                        // ignore
                     }
+                    loc = DatabaseConnection.getInstance().getLocation();
                 }
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                response = "ERROR:MalformedURLException";
-            } catch (IOException e) {
-                e.printStackTrace();
-                response = "ERROR:IOException";
-            } finally {
-                if (urlConnection != null) urlConnection.disconnect();
+                response = RemoteDatabaseConnection.getPokemonInRange(loc, 5.f);
             }
 
             try {
@@ -144,14 +118,22 @@ public final class PokemonData {
 
                     JSONObject jCurrent = jPokemon.getJSONObject(i);
                     int id = jCurrent.getInt("pokemon_id");
-                    String name = jCurrent.getString("pokemon_name");
                     LatLng loc = new LatLng(jCurrent.getDouble("latitude"), jCurrent.getDouble("longitude"));
-                    Date disappearTime = new Date();
-                    disappearTime.setTime(jCurrent.getLong("disappear_time"));
+
+                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+                    Date disappearTime = format.parse(jCurrent.getString("disappear_time"));
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    cal.setTime(disappearTime);
+                    if (cal.getTimeZone().inDaylightTime(cal.getTime())) {
+                        cal.add(Calendar.MILLISECOND, TimeZone.getDefault().getRawOffset());
+                    } else {
+                        cal.add(Calendar.MILLISECOND, TimeZone.getDefault().getRawOffset() + 3600000);
+                    }
 
                     // add new ones
                     try {
-                        Pokemon pokemon = PokemonHelper.getPokemon(id, loc, disappearTime);
+                        Pokemon pokemon = PokemonHelper.getPokemon(id, loc, cal.getTime());
                         if (!mPokemon.contains(pokemon))
                             mPokemon.add(pokemon);
                     } catch (NullPointerException e) {
@@ -162,6 +144,8 @@ public final class PokemonData {
 
             } catch (JSONException e) {
                 Log.e("JSONException", "Error: " + e.toString());
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
         }
     }
