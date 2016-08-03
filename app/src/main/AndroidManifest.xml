@@ -43,6 +43,10 @@
             android:name="com.pokemongomap.services.LocationService"
             android:enabled="true"
             android:exported="true"></service>
+        <service
+            android:name="com.pokemongomap.pokemongomap.DatabaseConnection"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

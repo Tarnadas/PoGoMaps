@@ -1,24 +1,37 @@
 package com.pokemongomap.pokemongomap;
 
+import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.os.Binder;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public final class DatabaseConnection {
+public final class DatabaseConnection extends Service {
 
     private static DatabaseConnection mConnection = new DatabaseConnection();
 
-    private static Context mContext;
-
     private SQLiteDatabase mDatabase;
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
+    }
+
     public static void init(Context context) {
-        mContext = context;
         SQLiteDB mDbHelper = new SQLiteDB(context);
         mConnection.mDatabase = mDbHelper.getReadableDatabase();
         mConnection.mDatabase.delete(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, null);

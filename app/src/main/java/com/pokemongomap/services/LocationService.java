@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -33,17 +34,10 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
 
-    private final IBinder mBinder = new LocationBinder();
-
-    public class LocationBinder extends Binder {
-        public LocationService getService() {
-            return LocationService.this;
-        }
-    }
-
+    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        return null;
     }
 
     @Override
@@ -57,8 +51,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
