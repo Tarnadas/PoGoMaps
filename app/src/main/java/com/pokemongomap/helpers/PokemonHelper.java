@@ -169,8 +169,23 @@ public abstract class PokemonHelper {
     public static Pokemon getPokemon(int id, LatLng loc, Date disappearTime) throws NullPointerException {
         Class c = mPokemonClasses[id-1];
         try {
-            //c.getDeclaredConstructor()
             return (Pokemon) c.getDeclaredConstructor(int.class, LatLng.class, Date.class).newInstance(id, loc, disappearTime);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        throw new NullPointerException();
+    }
+
+    public static Pokemon getBasePokemon(int id) throws NullPointerException {
+        Class c = mPokemonClasses[id-1];
+        try {
+            return (Pokemon) c.getDeclaredConstructor().newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
-import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 

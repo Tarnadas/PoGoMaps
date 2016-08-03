@@ -2,9 +2,12 @@ package com.pokemongomap.pokemon;
 
 
 import com.google.android.gms.maps.model.LatLng;
+import com.pokemongomap.pokemon.attacks.BasicAttack;
+import com.pokemongomap.pokemon.attacks.ChargeAttack;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public abstract class Pokemon {
 
@@ -13,6 +16,30 @@ public abstract class Pokemon {
     private LatLng mLoc;
     private Date mDisappearTime;
     protected int mResource;
+
+
+
+    protected int HP_RATIO;
+    protected int ATTACK_RATIO;
+    protected int DEFENSE_RATIO;
+    protected int MIN_CP;
+    protected int MAX_CP;
+
+    protected List<BasicAttack> BASE_ATTACKS;
+    protected List<ChargeAttack> CHARGE_ATTACKS;
+
+
+
+    protected int mHp;
+    protected int mAttack;
+    protected int mDefense;
+    protected int mCp;
+
+    protected BasicAttack mBaseAttack;
+    protected ChargeAttack mChargeAttack;
+
+    public Pokemon() {
+    }
 
     public Pokemon(int id, LatLng loc, Date disappearTime) {
         mId = id;
@@ -38,6 +65,58 @@ public abstract class Pokemon {
 
     public int getResource() {
         return mResource;
+    }
+
+    public int getHp() {
+        return mHp;
+    }
+
+    public int getAttack() {
+        return mAttack;
+    }
+
+    public int getDefense() {
+        return mDefense;
+    }
+
+    public int getCp() {
+        return mCp;
+    }
+
+    public BasicAttack getBaseAttack() {
+        return mBaseAttack;
+    }
+
+    public ChargeAttack getChargeAttack() {
+        return mChargeAttack;
+    }
+
+    public int getHpRatio() {
+        return HP_RATIO;
+    }
+
+    public int getAttackRatio() {
+        return ATTACK_RATIO;
+    }
+
+    public int getDefenseRatio() {
+        return DEFENSE_RATIO;
+    }
+
+    public int getMinCp() {
+        return MIN_CP;
+    }
+
+    public int getMaxCp() {
+        return MAX_CP;
+    }
+
+    public List<BasicAttack> getBaseAttacks() {
+        return BASE_ATTACKS;
+    }
+
+    public List<ChargeAttack> getChargeAttacks() {
+        return CHARGE_ATTACKS;
     }
 
     @Override
