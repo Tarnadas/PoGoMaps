@@ -33,9 +33,6 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, EasyPermissions.PermissionCallbacks {
 
 
-    private LocationService mService;
-    private boolean mBound = false;
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -48,6 +45,8 @@ public class MainActivity extends AppCompatActivity
     public void onPermissionsGranted(int requestCode, List<String> list) {
         Intent serviceIntent = new Intent(this, LocationService.class);
         startService(serviceIntent);
+        Intent database = new Intent(this, DatabaseConnection.class);
+        startService(database);
     }
 
     @Override
@@ -90,6 +89,8 @@ public class MainActivity extends AppCompatActivity
             } else {
                 Intent serviceIntent = new Intent(this, LocationService.class);
                 startService(serviceIntent);
+                Intent database = new Intent(this, DatabaseConnection.class);
+                startService(database);
             }
         }
     }
@@ -115,6 +116,8 @@ public class MainActivity extends AppCompatActivity
         } else {
             Intent serviceIntent = new Intent(this, LocationService.class);
             startService(serviceIntent);
+            Intent database = new Intent(this, DatabaseConnection.class);
+            startService(database);
         }
 
         super.onCreate(savedInstanceState);
@@ -145,14 +148,6 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.mainContent, MapFragment.newInstance()).commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mBound) {
-            unbindService(mConnection);
-        }
     }
 
     @Override
@@ -215,21 +210,4 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            LocationService.LocationBinder binder = (LocationService.LocationBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
 }
