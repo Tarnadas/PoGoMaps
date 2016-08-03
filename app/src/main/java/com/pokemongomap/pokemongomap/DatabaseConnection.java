@@ -9,8 +9,6 @@ import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.concurrent.ExecutionException;
-
 public final class DatabaseConnection {
 
     private static DatabaseConnection mConnection = new DatabaseConnection();
@@ -23,6 +21,7 @@ public final class DatabaseConnection {
         mContext = context;
         SQLiteDB mDbHelper = new SQLiteDB(context);
         mConnection.mDatabase = mDbHelper.getReadableDatabase();
+        mConnection.mDatabase.delete(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, null);
     }
 
     public static DatabaseConnection getInstance() {
@@ -32,9 +31,10 @@ public final class DatabaseConnection {
     public void saveLocation(Location location) {
         synchronized (mConnection) {
             ContentValues values = new ContentValues();
-            values.put(LocationContract.LocationEntry.COLUMN_NAME, location.getLatitude() + " " + location.getLongitude());
+            values.put(LocationContract.LocationEntry.LOCATION_COLUMN_NAME, location.getLatitude() + " " + location.getLongitude());
 
-            mDatabase.insert(LocationContract.LocationEntry.TABLE_NAME, null, values);
+            mDatabase.delete(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, null);
+            mDatabase.insert(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, values);
             mConnection.notifyAll();
         }
     }
@@ -44,28 +44,28 @@ public final class DatabaseConnection {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                LocationContract.LocationEntry.COLUMN_NAME
+                LocationContract.LocationEntry.LOCATION_COLUMN_NAME
         };
 
-        Cursor c = mDatabase.query(LocationContract.LocationEntry.TABLE_NAME, projection, null, null, null, null, null);
+        Cursor c = mDatabase.query(LocationContract.LocationEntry.LOCATION_TABLE_NAME, projection, null, null, null, null, null);
 
         c.moveToFirst();
-        String loc[] = c.getString(c.getColumnIndexOrThrow(LocationContract.LocationEntry.COLUMN_NAME)).split(" ");
+        String loc[] = c.getString(c.getColumnIndexOrThrow(LocationContract.LocationEntry.LOCATION_COLUMN_NAME)).split(" ");
         return new LatLng(Double.parseDouble(loc[0]), Double.parseDouble(loc[1]));
     }
 
-    public String getLocationAsString() {
+    public String getLocationAsString() throws CursorIndexOutOfBoundsException {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                LocationContract.LocationEntry.COLUMN_NAME
+                LocationContract.LocationEntry.LOCATION_COLUMN_NAME
         };
 
         String[] loc;
-        Cursor c = mDatabase.query(LocationContract.LocationEntry.TABLE_NAME, projection, null, null, null, null, null);
+        Cursor c = mDatabase.query(LocationContract.LocationEntry.LOCATION_TABLE_NAME, projection, null, null, null, null, null);
 
         c.moveToFirst();
-        loc = c.getString(c.getColumnIndexOrThrow(LocationContract.LocationEntry.COLUMN_NAME)).split(" ");
+        loc = c.getString(c.getColumnIndexOrThrow(LocationContract.LocationEntry.LOCATION_COLUMN_NAME)).split(" ");
         return Double.parseDouble(loc[0]) + "_" + Double.parseDouble(loc[1]);
     }
 }
