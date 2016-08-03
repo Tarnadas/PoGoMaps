@@ -40,7 +40,7 @@
         </activity>
 
         <service
-            android:name=".LocationService"
+            android:name="com.pokemongomap.services.LocationService"
             android:enabled="true"
             android:exported="true"></service>
     </application>

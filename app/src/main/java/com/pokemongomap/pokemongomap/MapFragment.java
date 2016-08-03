@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.CursorIndexOutOfBoundsException;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -30,6 +31,7 @@ import com.pokemongomap.helpers.BitmapHelper;
 import com.pokemongomap.helpers.Constants;
 import com.pokemongomap.pokemon.Pokemon;
 import com.pokemongomap.pokemon.PokemonData;
+import com.pokemongomap.services.LocationIntentService;
 
 import java.util.Date;
 import java.util.Map;
@@ -64,6 +66,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private static boolean mMapReady = false;
     private static boolean mLocationReady = false;
+    private static boolean mSleep = false;
 
     private Map<Pokemon, GroundOverlay> mOverlays;
     private Map<Pokemon, Marker> mCountdowns;
@@ -79,10 +82,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     public static MapFragment getInstance() {
         return mMapFragment;
-    }
-
-    public GoogleMap getMap() {
-        return mMap;
     }
 
     @Override
@@ -127,6 +126,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     @Override
     public void onResume() {
         super.onResume();
+        mSleep = false;
     }
 
     @Override
@@ -134,7 +134,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         super.onPause();
         if (mMapReady)
             mLastBounds = mBounds;
-        mMapReady = false;
+        mSleep = true;
     }
 
     @Override
@@ -157,11 +157,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         mMaxZoomLevel = mMap.getMaxZoomLevel();
         mMapReady = true;
 
+        Intent intent = new Intent(getActivity(), LocationIntentService.class);
+        getActivity().startService(intent);
+
         if (mLocationReady) {
             mMapFragment = MapFragment.this;
             LatLng loc = DatabaseConnection.getInstance().getLocation();
-            mTrainer = mMap.addGroundOverlay(new GroundOverlayOptions().position(loc, getDimTrainer()).clickable(false).
-                    image(BitmapDescriptorFactory.fromResource(R.drawable.trainer)));
+            if (mTrainer == null) {
+                mTrainer = mMap.addGroundOverlay(new GroundOverlayOptions().position(loc, getDimTrainer()).clickable(false).
+                        image(BitmapDescriptorFactory.fromResource(R.drawable.trainer)));
+            }
             if (mLastBounds != null) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mLastBounds, 0));
             } else {
@@ -192,7 +197,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             currentTarget = pos.target;
             mBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
             float dim = getDim();
-            mTrainer.setDimensions(getDimTrainer());
+            if (mTrainer != null) {
+                mTrainer.setDimensions(getDimTrainer());
+            }
 
             for (Pokemon pokemon : PokemonData.getPokemon()) {
                 int seconds = (int) (pokemon.getDisappearTime().getTime() - new Date().getTime())/1000;
@@ -327,29 +334,47 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         @Override
         public void onReceive(Context context, final Intent intent) {
 
-            while (!mMapReady) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    while (!mMapReady || mSleep) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    String locString[] = intent.getExtras().getString(Constants.LOCATION_STATUS).split(" ");
+                    final LatLng loc = new LatLng(Double.parseDouble(locString[0]), Double.parseDouble(locString[1]));
+
+                    if (appStart) {
+                        mMapFragment = MapFragment.this;
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mTrainer == null) {
+                                    mTrainer = mMap.addGroundOverlay(new GroundOverlayOptions().position(loc, getDimTrainer()).clickable(false).
+                                            image(BitmapDescriptorFactory.fromResource(R.drawable.trainer)));
+                                }
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, DEFAULT_ZOOM));
+                                mMap.setOnCameraChangeListener(mMapFragment);
+                            }
+                        });
+                        mLocationReady = true;
+                        appStart = false;
+                    } else if (mTrainer != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mTrainer.setPosition(loc);
+                            }
+                        });
+                    }
+                    return null;
                 }
-            }
-
-            String locString[] = intent.getExtras().getString(Constants.LOCATION_STATUS).split(" ");
-            LatLng loc = new LatLng(Double.parseDouble(locString[0]), Double.parseDouble(locString[1]));
-
-            if (appStart) {
-                mMapFragment = MapFragment.this;
-
-                mTrainer = mMap.addGroundOverlay(new GroundOverlayOptions().position(loc, getDimTrainer()).clickable(false).
-                        image(BitmapDescriptorFactory.fromResource(R.drawable.trainer)));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, DEFAULT_ZOOM));
-
-                mMap.setOnCameraChangeListener(mMapFragment);
-                mLocationReady = true;
-            } else if (mTrainer != null) {
-                mTrainer.setPosition(loc);
-            }
+            }.execute();
         }
     }
 

@@ -1,6 +1,6 @@
-package com.pokemongomap.pokemongomap;
+package com.pokemongomap.services;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -10,7 +10,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -23,12 +22,12 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.maps.model.LatLng;
 import com.pokemongomap.helpers.Constants;
+import com.pokemongomap.pokemongomap.DatabaseConnection;
 
 import java.io.Serializable;
 
-public class LocationService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, ResultCallback<LocationSettingsResult>, Serializable {
 
     private GoogleApiClient mGoogleApiClient;
@@ -36,16 +35,8 @@ public class LocationService extends IntentService implements GoogleApiClient.Co
 
     private final IBinder mBinder = new LocationBinder();
 
-    public LocationService() {
-        super("LocationService");
-    }
-
-    public LocationService(String name) {
-        super(name);
-    }
-
     public class LocationBinder extends Binder {
-        LocationService getService() {
+        public LocationService getService() {
             return LocationService.this;
         }
     }
@@ -53,36 +44,6 @@ public class LocationService extends IntentService implements GoogleApiClient.Co
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-            mGoogleApiClient.connect();
-        }
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            //return;
-        }
-        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mCurrentLocation == null) {
-            synchronized (DatabaseConnection.getInstance()) {
-                try {
-                    DatabaseConnection.getInstance().wait();
-                    mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-        }
-        DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
-
-        Intent localIntent = new Intent(Constants.LOCATION_BROADCAST).putExtra(Constants.LOCATION_STATUS, mCurrentLocation.getLatitude() + " " + mCurrentLocation.getLongitude());
-        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
     @Override

@@ -9,17 +9,17 @@ public final class LocationContract {
 
     /* Inner class that defines the table contents */
     public static abstract class LocationEntry implements BaseColumns {
-        public static final String TABLE_NAME = "location";
-        public static final String COLUMN_NAME = "loc";
+        public static final String LOCATION_TABLE_NAME = "location";
+        public static final String LOCATION_COLUMN_NAME = "loc";
     }
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String COMMA_SEP = ",";
 
     public static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + LocationEntry.TABLE_NAME + " (" +
-                    LocationEntry.COLUMN_NAME + " )";
+            "CREATE TABLE " + LocationEntry.LOCATION_TABLE_NAME + " (" +
+                    LocationEntry.LOCATION_COLUMN_NAME + " )";
 
     public static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + LocationEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + LocationEntry.LOCATION_TABLE_NAME;
 }

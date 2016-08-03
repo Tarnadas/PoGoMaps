@@ -25,6 +25,7 @@ import com.pokemongomap.helpers.Constants;
 import com.pokemongomap.permissions.EasyPermissions;
 import com.pokemongomap.pokemon.PokemonData;
 import com.pokemongomap.helpers.PokemonHelper;
+import com.pokemongomap.services.LocationService;
 
 import java.util.List;
 
@@ -32,8 +33,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, EasyPermissions.PermissionCallbacks {
 
 
-    LocationService mService;
-    boolean mBound = false;
+    private LocationService mService;
+    private boolean mBound = false;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
