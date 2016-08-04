@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class ThunderPunch extends ChargeAttack {
 
     public ThunderPunch() {
-        super(40, 2400, 33, 5.f, TypeModifier.ELECTRIC);
+        super(77, 40, 2400, 33, 5.f, TypeModifier.ELECTRIC);
     }
 
 }

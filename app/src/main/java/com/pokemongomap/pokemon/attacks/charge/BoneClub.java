@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class BoneClub extends ChargeAttack {
 
     public BoneClub() {
-        super(25, 1600, 25, 5.f, TypeModifier.GROUND);
+        super(94, 25, 1600, 25, 5.f, TypeModifier.GROUND);
     }
 
 }

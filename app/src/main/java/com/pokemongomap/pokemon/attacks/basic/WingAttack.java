@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class WingAttack extends BasicAttack {
 
     public WingAttack() {
-        super(9, 750, 7, TypeModifier.FLYING);
+        super(210, 9, 750, 7, TypeModifier.FLYING);
     }
 
 }

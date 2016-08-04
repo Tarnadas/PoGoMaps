@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class MudShot extends BasicAttack {
 
     public MudShot() {
-        super(6, 550, 7, TypeModifier.GROUND);
+        super(216, 6, 550, 7, TypeModifier.GROUND);
     }
 
 }

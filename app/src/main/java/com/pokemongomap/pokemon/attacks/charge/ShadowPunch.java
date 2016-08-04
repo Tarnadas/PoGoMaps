@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class ShadowPunch extends ChargeAttack {
 
     public ShadowPunch() {
-        super(25, 2100, 25, 5.f, TypeModifier.GHOST);
+        super(67, 25, 2100, 25, 5.f, TypeModifier.GHOST);
     }
 
 }

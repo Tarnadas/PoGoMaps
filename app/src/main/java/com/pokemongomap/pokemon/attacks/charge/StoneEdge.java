@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class StoneEdge extends ChargeAttack {
 
     public StoneEdge() {
-        super(80, 3100, 100, 50.f, TypeModifier.ROCK);
+        super(32, 80, 3100, 100, 50.f, TypeModifier.ROCK);
     }
 
 }

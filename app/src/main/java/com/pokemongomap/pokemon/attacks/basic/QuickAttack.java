@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class QuickAttack extends BasicAttack {
 
     public QuickAttack() {
-        super(10, 1330, 12, TypeModifier.NORMAL);
+        super(219, 10, 1330, 12, TypeModifier.NORMAL);
     }
 
 }

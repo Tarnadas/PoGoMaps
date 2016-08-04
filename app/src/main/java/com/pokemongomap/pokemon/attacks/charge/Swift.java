@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Swift extends ChargeAttack {
 
     public Swift() {
-        super(30, 3000, 25, 5.f, TypeModifier.NORMAL);
+        super(125, 30, 3000, 25, 5.f, TypeModifier.NORMAL);
     }
 
 }

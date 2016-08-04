@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class PsychoCut extends BasicAttack {
 
     public PsychoCut() {
-        super(7, 570, 7, TypeModifier.PSYCHIC);
+        super(226, 7, 570, 7, TypeModifier.PSYCHIC);
     }
 
 }

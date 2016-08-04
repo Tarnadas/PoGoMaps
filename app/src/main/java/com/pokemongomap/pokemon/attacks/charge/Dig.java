@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Dig extends ChargeAttack {
 
     public Dig() {
-        super(70, 5800, 33, 5.f, TypeModifier.GROUND);
+        super(26, 70, 5800, 33, 5.f, TypeModifier.GROUND);
     }
 
 }

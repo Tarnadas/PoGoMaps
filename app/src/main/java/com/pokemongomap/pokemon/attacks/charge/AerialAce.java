@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class AerialAce extends ChargeAttack {
 
     public AerialAce() {
-        super(30, 2900, 25, 5.f, TypeModifier.FLYING);
+        super(45, 30, 2900, 25, 5.f, TypeModifier.FLYING);
     }
 
 }

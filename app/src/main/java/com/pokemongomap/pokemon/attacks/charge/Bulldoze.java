@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Bulldoze extends ChargeAttack {
 
     public Bulldoze() {
-        super(35, 3400, 25, 5.f, TypeModifier.GROUND);
+        super(95, 35, 3400, 25, 5.f, TypeModifier.GROUND);
     }
 
 }

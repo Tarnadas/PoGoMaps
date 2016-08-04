@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class BugBite extends BasicAttack {
 
     public BugBite() {
-        super(5, 450, 7, TypeModifier.BUG);
+        super(201, 5, 450, 7, TypeModifier.BUG);
     }
 
 }

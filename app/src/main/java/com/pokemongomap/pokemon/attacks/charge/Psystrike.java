@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Psystrike extends ChargeAttack {
 
     public Psystrike() {
-        super(100, 5100, 100, 5.f, TypeModifier.PSYCHIC);
+        super(109, 100, 5100, 100, 5.f, TypeModifier.PSYCHIC);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class SignalBeam extends ChargeAttack {
 
     public SignalBeam() {
-        super(45, 3100, 33, 5.f, TypeModifier.BUG);
+        super(99, 45, 3100, 33, 5.f, TypeModifier.BUG);
     }
 
 }

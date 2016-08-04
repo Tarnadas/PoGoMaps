@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class DarkPulse extends ChargeAttack {
 
     public DarkPulse() {
-        super(45, 3500, 33, 5.f, TypeModifier.DARK);
+        super(16, 45, 3500, 33, 5.f, TypeModifier.DARK);
     }
 
 }

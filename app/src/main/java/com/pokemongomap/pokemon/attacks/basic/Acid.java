@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class Acid extends BasicAttack {
 
     public Acid() {
-        super(10, 1050, 10, TypeModifier.POISON);
+        super(225, 10, 1050, 10, TypeModifier.POISON);
     }
 
 }

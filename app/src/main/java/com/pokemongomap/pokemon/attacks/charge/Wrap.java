@@ -7,7 +7,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Wrap extends ChargeAttack {
 
     public Wrap() {
-        super(25, 4000, 20, 5.f, TypeModifier.NORMAL);
+        super(13, 25, 4000, 20, 5.f, TypeModifier.NORMAL);
     }
 
 }

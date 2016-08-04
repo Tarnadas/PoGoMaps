@@ -4,6 +4,7 @@ import com.pokemongomap.pokemon.TypeModifier;
 
 public class BasicAttack {
 
+    private int mId;
     private int mPower;
     private int mSpeed;
     private int mEnergy;
@@ -11,7 +12,8 @@ public class BasicAttack {
     private float mDamagePerSecond;
     private float mEnergyPerSecond;
 
-    public BasicAttack(int power, int speed, int energy, TypeModifier type) {
+    public BasicAttack(int id, int power, int speed, int energy, TypeModifier type) {
+        mId = id;
         mPower = power;
         mSpeed = speed;
         mEnergy = energy;
@@ -20,12 +22,20 @@ public class BasicAttack {
         mEnergyPerSecond = mEnergy * 1000 / mSpeed;
     }
 
+    public int getId() {
+        return mId;
+    }
+
     public int getPower() {
         return mPower;
     }
 
     public int getSpeed() {
         return mSpeed;
+    }
+
+    public int getEnergy() {
+        return mEnergy;
     }
 
     public TypeModifier getType() {

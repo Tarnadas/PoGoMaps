@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class FireBlast extends ChargeAttack {
 
     public FireBlast() {
-        super(100, 4100, 100, 5.f, TypeModifier.FIRE);
+        super(103, 100, 4100, 100, 5.f, TypeModifier.FIRE);
     }
 
 }

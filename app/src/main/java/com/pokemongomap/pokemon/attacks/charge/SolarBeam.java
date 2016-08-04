@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class SolarBeam extends ChargeAttack {
 
     public SolarBeam() {
-        super(120, 4900, 100, 5.f, TypeModifier.GRASS);
+        super(116, 120, 4900, 100, 5.f, TypeModifier.GRASS);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Hurricane extends ChargeAttack {
 
     public Hurricane() {
-        super(80, 3200, 100, 5.f, TypeModifier.FLYING);
+        super(122, 80, 3200, 100, 5.f, TypeModifier.FLYING);
     }
 
 }

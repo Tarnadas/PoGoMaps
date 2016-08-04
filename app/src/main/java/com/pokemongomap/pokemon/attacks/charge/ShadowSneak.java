@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class ShadowSneak extends ChargeAttack {
 
     public ShadowSneak() {
-        super(25, 3100, 20, 5.f, TypeModifier.GHOST);
+        super(66, 25, 3100, 20, 5.f, TypeModifier.GHOST);
     }
 
 }

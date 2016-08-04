@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Submission extends ChargeAttack {
 
     public Submission() {
-        super(30, 2100, 33, 5.f, TypeModifier.FIGHTING);
+        super(54, 30, 2100, 33, 5.f, TypeModifier.FIGHTING);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class WaterPulse extends ChargeAttack {
 
     public WaterPulse() {
-        super(35, 3300, 25, 5.f, TypeModifier.WATER);
+        super(105, 35, 3300, 25, 5.f, TypeModifier.WATER);
     }
 
 }

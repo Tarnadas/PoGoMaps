@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class XScissor extends ChargeAttack {
 
     public XScissor() {
-        super(35, 2100, 33, 5.f, TypeModifier.BUG);
+        super(100, 35, 2100, 33, 5.f, TypeModifier.BUG);
     }
 
 }

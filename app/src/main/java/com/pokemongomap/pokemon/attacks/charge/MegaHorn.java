@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class MegaHorn extends ChargeAttack {
 
     public MegaHorn() {
-        super(80, 3200, 100, 5.f, TypeModifier.BUG);
+        super(22, 80, 3200, 100, 5.f, TypeModifier.BUG);
     }
 
 }

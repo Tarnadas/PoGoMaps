@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class Lick extends BasicAttack {
 
     public Lick() {
-        super(5, 500, 6, TypeModifier.GHOST);
+        super(212, 5, 500, 6, TypeModifier.GHOST);
     }
 
 }

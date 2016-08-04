@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class RockThrow extends BasicAttack {
 
     public RockThrow() {
-        super(12, 1360, 15, TypeModifier.ROCK);
+        super(227, 12, 1360, 15, TypeModifier.ROCK);
     }
 
 }

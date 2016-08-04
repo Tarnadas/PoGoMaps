@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Moonblast extends ChargeAttack {
 
     public Moonblast() {
-        super(85, 4100, 100, 5.f, TypeModifier.FAIRY);
+        super(87, 85, 4100, 100, 5.f, TypeModifier.FAIRY);
     }
 
 }

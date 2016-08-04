@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class DragonPulse extends ChargeAttack {
 
     public DragonPulse() {
-        super(65, 3600, 50, 5.f, TypeModifier.DRAGON);
+        super(82, 65, 3600, 50, 5.f, TypeModifier.DRAGON);
     }
 
 }

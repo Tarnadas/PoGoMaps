@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class HydroPumpB extends ChargeAttack {
 
     public HydroPumpB() {
-        super(90, 3800, 100, 5.f, TypeModifier.WATER);
+        super(135, 90, 3800, 100, 5.f, TypeModifier.WATER);
     }
 
 }

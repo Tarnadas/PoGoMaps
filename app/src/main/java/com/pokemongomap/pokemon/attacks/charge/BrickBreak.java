@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class BrickBreak extends ChargeAttack {
 
     public BrickBreak() {
-        super(30, 1600, 33, 25.f, TypeModifier.FIGHTING);
+        super(123, 30, 1600, 33, 25.f, TypeModifier.FIGHTING);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class FirePunch extends ChargeAttack {
 
     public FirePunch() {
-        super(40, 2800, 33, 5.f, TypeModifier.FIRE);
+        super(115, 40, 2800, 33, 5.f, TypeModifier.FIRE);
     }
 
 }

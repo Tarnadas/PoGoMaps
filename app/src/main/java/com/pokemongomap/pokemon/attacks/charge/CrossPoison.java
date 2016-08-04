@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class CrossPoison extends ChargeAttack {
 
     public CrossPoison() {
-        super(25, 1500, 25, 25.f, TypeModifier.POISON);
+        super(89, 25, 1500, 25, 25.f, TypeModifier.POISON);
     }
 
 }

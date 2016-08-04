@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class IcePunch extends ChargeAttack {
 
     public IcePunch() {
-        super(45, 3500, 33, 5.f, TypeModifier.ICE);
+        super(33, 45, 3500, 33, 5.f, TypeModifier.ICE);
     }
 
 }

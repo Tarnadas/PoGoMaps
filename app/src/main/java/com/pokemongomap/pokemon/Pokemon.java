@@ -2,14 +2,19 @@ package com.pokemongomap.pokemon;
 
 
 import com.google.android.gms.maps.model.LatLng;
+import com.pokemongomap.pokemon.attacks.Attacks;
 import com.pokemongomap.pokemon.attacks.BasicAttack;
 import com.pokemongomap.pokemon.attacks.ChargeAttack;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Pokemon {
+
+    private static final float STAB_MODIFIER = 1.25f;
 
     private int mId;
     protected String mName;
@@ -24,9 +29,13 @@ public abstract class Pokemon {
     protected int DEFENSE_RATIO;
     protected int MIN_CP;
     protected int MAX_CP;
+    protected TypeModifier TYPE;
+    protected TypeModifier TYPE_SECONDARY;
 
     protected List<BasicAttack> BASE_ATTACKS;
     protected List<ChargeAttack> CHARGE_ATTACKS;
+
+    private Map<Attacks, Float> mDpsList;
 
 
 
@@ -35,8 +44,7 @@ public abstract class Pokemon {
     protected int mDefense;
     protected int mCp;
 
-    protected BasicAttack mBaseAttack;
-    protected ChargeAttack mChargeAttack;
+    protected Attacks mAttacks;
 
     public Pokemon() {
     }
@@ -83,12 +91,12 @@ public abstract class Pokemon {
         return mCp;
     }
 
-    public BasicAttack getBaseAttack() {
-        return mBaseAttack;
+    public BasicAttack getBasicAttack() {
+        return mAttacks.getBasicAttack();
     }
 
     public ChargeAttack getChargeAttack() {
-        return mChargeAttack;
+        return mAttacks.getChargeAttack();
     }
 
     public int getHpRatio() {
@@ -117,6 +125,38 @@ public abstract class Pokemon {
 
     public List<ChargeAttack> getChargeAttacks() {
         return CHARGE_ATTACKS;
+    }
+
+    public void createDpsMap() {
+        mDpsList = new HashMap<>();
+        for (BasicAttack basicAttack : BASE_ATTACKS) {
+            for (ChargeAttack chargeAttack : CHARGE_ATTACKS) {
+                float avgMovesToFillEnergy = (float)basicAttack.getEnergy() / (float)chargeAttack.getEnergyCost();
+                float basicDamage = (float)basicAttack.getPower();
+                if (basicAttack.getType().equals(TYPE) || basicAttack.getType().equals(TYPE_SECONDARY)) {
+                    basicDamage *= STAB_MODIFIER;
+                }
+                float chargeDamage = (float)chargeAttack.getPower();
+                if (chargeAttack.getType().equals(TYPE) || chargeAttack.getType().equals(TYPE_SECONDARY)) {
+                    chargeDamage *= STAB_MODIFIER;
+                }
+                float damagePerCycle = basicDamage * avgMovesToFillEnergy + chargeDamage;
+                float timePerCycleInMillis = (float)basicAttack.getSpeed() * avgMovesToFillEnergy + (float)chargeAttack.getSpeed();
+                float cyclesPerFight = 100000.f / timePerCycleInMillis;
+                float damagePerFight = cyclesPerFight * damagePerCycle;
+                mDpsList.put(new Attacks(basicAttack, chargeAttack), damagePerFight);
+            }
+        }
+    }
+
+    public float getMaxDps() {
+        float maxDps = 0.f;
+        for (Float dps : mDpsList.values()) {
+            if (dps > maxDps) {
+                maxDps = dps;
+            }
+        }
+        return maxDps;
     }
 
     @Override

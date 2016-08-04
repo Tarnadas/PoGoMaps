@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class VineWhip extends BasicAttack {
 
     public VineWhip() {
-        super(7, 650, 7, TypeModifier.GRASS);
+        super(214, 7, 650, 7, TypeModifier.GRASS);
     }
 
 }

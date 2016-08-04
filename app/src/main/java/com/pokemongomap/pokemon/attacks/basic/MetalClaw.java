@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class MetalClaw extends BasicAttack {
 
     public MetalClaw() {
-        super(8, 630, 7, TypeModifier.STEEL);
+        super(228, 8, 630, 7, TypeModifier.STEEL);
     }
 
 }

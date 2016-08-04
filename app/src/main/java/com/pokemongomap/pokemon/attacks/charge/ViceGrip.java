@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class ViceGrip extends ChargeAttack {
 
     public ViceGrip() {
-        super(25, 2100, 20, 5.f, TypeModifier.NORMAL);
+        super(20, 25, 2100, 20, 5.f, TypeModifier.NORMAL);
     }
 
 }

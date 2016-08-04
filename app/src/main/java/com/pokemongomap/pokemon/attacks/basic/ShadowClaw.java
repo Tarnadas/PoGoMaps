@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class ShadowClaw extends BasicAttack {
 
     public ShadowClaw() {
-        super(11, 950, 8, TypeModifier.GHOST);
+        super(213, 11, 950, 8, TypeModifier.GHOST);
     }
 
 }

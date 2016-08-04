@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class MegaDrain extends ChargeAttack {
 
     public MegaDrain() {
-        super(25, 3200, 20, 5.f, TypeModifier.GRASS);
+        super(48, 25, 3200, 20, 5.f, TypeModifier.GRASS);
     }
 
 }

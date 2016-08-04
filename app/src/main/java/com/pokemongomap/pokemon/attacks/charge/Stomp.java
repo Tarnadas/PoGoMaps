@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Stomp extends ChargeAttack {
 
     public Stomp() {
-        super(30, 2100, 25, 5.f, TypeModifier.NORMAL);
+        super(127, 30, 2100, 25, 5.f, TypeModifier.NORMAL);
     }
 
 }

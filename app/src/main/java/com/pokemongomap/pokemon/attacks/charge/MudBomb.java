@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class MudBomb extends ChargeAttack {
 
     public MudBomb() {
-        super(30, 2600, 25, 5.f, TypeModifier.GROUND);
+        super(96, 30, 2600, 25, 5.f, TypeModifier.GROUND);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class RockSlide extends ChargeAttack {
 
     public RockSlide() {
-        super(50, 3200, 33, 5.f, TypeModifier.ROCK);
+        super(64, 50, 3200, 33, 5.f, TypeModifier.ROCK);
     }
 
 }

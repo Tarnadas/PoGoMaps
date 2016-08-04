@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class HornAttack extends ChargeAttack {
 
     public HornAttack() {
-        super(25, 2200, 25, 5.f, TypeModifier.NORMAL);
+        super(126, 25, 2200, 25, 5.f, TypeModifier.NORMAL);
     }
 
 }

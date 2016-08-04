@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class RockTomb extends ChargeAttack {
 
     public RockTomb() {
-        super(30, 3400, 25, 25.f, TypeModifier.ROCK);
+        super(63, 30, 3400, 25, 25.f, TypeModifier.ROCK);
     }
 
 }
