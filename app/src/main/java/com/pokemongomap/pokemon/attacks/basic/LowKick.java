@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class LowKick extends BasicAttack {
 
     public LowKick() {
-        super(207, 5, 600, 7, TypeModifier.FIGHTING);
+        super(207, 5, 600, 7, TypeModifier.Type.FIGHTING);
     }
 
 }

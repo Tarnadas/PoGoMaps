@@ -20,6 +20,9 @@ public class Attacks {
 
     @Override
     public int hashCode() {
-        return mBasicAttack.getId() + (mChargeAttack.getId() << 16);
+        if (mChargeAttack != null) {
+            return mBasicAttack.getId() + (mChargeAttack.getId() << 16);
+        }
+        return mBasicAttack.getId();
     }
 }

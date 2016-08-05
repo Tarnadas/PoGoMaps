@@ -33,17 +33,31 @@ public final class DatabaseConnection extends Service {
     public static void init(Context context) {
         SQLiteDB mDbHelper = new SQLiteDB(context);
         mConnection.mDatabase = mDbHelper.getReadableDatabase();
-        mConnection.mDatabase.delete(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, null);
     }
 
     public static DatabaseConnection getInstance() {
         return mConnection;
     }
 
+    public void purge() {
+        mDatabase.delete(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, null);
+    }
+
     public void saveLocation(Location location) {
         synchronized (mConnection) {
             ContentValues values = new ContentValues();
             values.put(LocationContract.LocationEntry.LOCATION_COLUMN_NAME, location.getLatitude() + " " + location.getLongitude());
+
+            mDatabase.delete(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, null);
+            mDatabase.insert(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, values);
+            mConnection.notifyAll();
+        }
+    }
+
+    public void saveLocation(LatLng location) {
+        synchronized (mConnection) {
+            ContentValues values = new ContentValues();
+            values.put(LocationContract.LocationEntry.LOCATION_COLUMN_NAME, location.latitude + " " + location.longitude);
 
             mDatabase.delete(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, null);
             mDatabase.insert(LocationContract.LocationEntry.LOCATION_TABLE_NAME, null, values);

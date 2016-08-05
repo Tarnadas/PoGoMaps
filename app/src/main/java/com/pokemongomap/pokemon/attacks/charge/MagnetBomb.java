@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class MagnetBomb extends ChargeAttack {
 
     public MagnetBomb() {
-        super(72, 30, 2800, 25, 5.f, TypeModifier.STEEL);
+        super(72, 30, 2800, 25, 5.f, TypeModifier.Type.STEEL);
     }
 
 }

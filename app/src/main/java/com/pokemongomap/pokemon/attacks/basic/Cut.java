@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class Cut extends BasicAttack {
 
     public Cut() {
-        super(223, 12, 1130, 10, TypeModifier.NORMAL);
+        super(223, 12, 1130, 10, TypeModifier.Type.NORMAL);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class IronHead extends ChargeAttack {
 
     public IronHead() {
-        super(74, 30, 2000, 33, 5.f, TypeModifier.STEEL);
+        super(74, 30, 2000, 33, 5.f, TypeModifier.Type.STEEL);
     }
 
 }

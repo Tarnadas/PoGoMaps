@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Brine extends ChargeAttack {
 
     public Brine() {
-        super(104, 25, 2400, 25, 5.f, TypeModifier.WATER);
+        super(104, 25, 2400, 25, 5.f, TypeModifier.Type.WATER);
     }
 
 }

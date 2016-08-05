@@ -38,8 +38,6 @@ public final class PokemonData {
 
     private static PokemonData mPokemonData = new PokemonData();
 
-    private static final String SERVER_IP = "89.163.173.74:5000/raw_data";
-
     private static volatile Queue<Pokemon> mPokemon;
 
     public static void init() {

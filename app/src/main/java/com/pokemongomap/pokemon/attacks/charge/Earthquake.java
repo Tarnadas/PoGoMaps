@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Earthquake extends ChargeAttack {
 
     public Earthquake() {
-        super(31, 100, 4200, 100, 5.f, TypeModifier.GROUND);
+        super(31, 100, 4200, 100, 5.f, TypeModifier.Type.GROUND);
     }
 
 }

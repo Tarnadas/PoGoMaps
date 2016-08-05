@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class NightSlash extends ChargeAttack {
 
     public NightSlash() {
-        super(51, 30, 2700, 25, 25.f, TypeModifier.DARK);
+        super(51, 30, 2700, 25, 25.f, TypeModifier.Type.DARK);
     }
 
 }

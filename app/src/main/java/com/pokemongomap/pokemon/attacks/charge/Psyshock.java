@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Psyshock extends ChargeAttack {
 
     public Psyshock() {
-        super(60, 40, 2700, 33, 5.f, TypeModifier.PSYCHIC);
+        super(60, 40, 2700, 33, 5.f, TypeModifier.Type.PSYCHIC);
     }
 
 }

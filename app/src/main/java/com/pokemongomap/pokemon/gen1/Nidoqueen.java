@@ -96,19 +96,22 @@ public class Nidoqueen extends Pokemon {
 
     public Nidoqueen() {
         super();
+        super.mResource = R.drawable.p31;
         super.HP_RATIO = HP_RATIO;
         super.ATTACK_RATIO = ATTACK_RATIO;
         super.DEFENSE_RATIO = DEFENSE_RATIO;
         super.MIN_CP = MIN_CP;
         super.MAX_CP = MAX_CP;
-        super.TYPE = TypeModifier.POISON;
-        super.TYPE_SECONDARY = TypeModifier.NONE;
+        super.TYPE = TypeModifier.Type.POISON;
+        super.TYPE_SECONDARY = TypeModifier.Type.GROUND;
 
+        BASE_ATTACKS = new ArrayList<>();
         BASE_ATTACKS.add(BASE_ATTACK_1);
         if (BASE_ATTACK_1 != null) {
             BASE_ATTACKS.add(BASE_ATTACK_2);
         }
         super.BASE_ATTACKS = BASE_ATTACKS;
+        CHARGE_ATTACKS = new ArrayList<>();
         CHARGE_ATTACKS.add(CHARGE_ATTACK_1);
         if (CHARGE_ATTACK_2 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_2);
@@ -116,7 +119,7 @@ public class Nidoqueen extends Pokemon {
         if (CHARGE_ATTACK_3 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_3);
         }
-        super.BASE_ATTACKS = BASE_ATTACKS;
+        super.CHARGE_ATTACKS = CHARGE_ATTACKS;
     }
 
     public Nidoqueen(int id, LatLng loc, Date disappearTime) {

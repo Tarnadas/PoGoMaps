@@ -2,6 +2,7 @@ package com.pokemongomap.pokemon.gen1;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.pokemongomap.pokemon.Pokemon;
+import com.pokemongomap.pokemon.TypeModifier;
 import com.pokemongomap.pokemon.attacks.BasicAttack;
 import com.pokemongomap.pokemon.attacks.ChargeAttack;
 import com.pokemongomap.pokemon.attacks.basic.Ember;
@@ -42,17 +43,22 @@ public class Charmeleon extends Pokemon {
 
     public Charmeleon() {
         super();
+        super.mResource = R.drawable.p5;
         super.HP_RATIO = HP_RATIO;
         super.ATTACK_RATIO = ATTACK_RATIO;
         super.DEFENSE_RATIO = DEFENSE_RATIO;
         super.MIN_CP = MIN_CP;
         super.MAX_CP = MAX_CP;
+        super.TYPE = TypeModifier.Type.FIRE;
+        super.TYPE_SECONDARY = TypeModifier.Type.NONE;
 
+        BASE_ATTACKS = new ArrayList<>();
         BASE_ATTACKS.add(BASE_ATTACK_1);
         if (BASE_ATTACK_1 != null) {
             BASE_ATTACKS.add(BASE_ATTACK_2);
         }
         super.BASE_ATTACKS = BASE_ATTACKS;
+        CHARGE_ATTACKS = new ArrayList<>();
         CHARGE_ATTACKS.add(CHARGE_ATTACK_1);
         if (CHARGE_ATTACK_2 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_2);
@@ -60,7 +66,7 @@ public class Charmeleon extends Pokemon {
         if (CHARGE_ATTACK_3 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_3);
         }
-        super.BASE_ATTACKS = BASE_ATTACKS;
+        super.CHARGE_ATTACKS = CHARGE_ATTACKS;
     }
 
     public Charmeleon(int id, LatLng loc, Date disappearTime) {

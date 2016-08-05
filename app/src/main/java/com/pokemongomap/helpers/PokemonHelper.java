@@ -11,6 +11,8 @@ public abstract class PokemonHelper {
 
     private static Class[] mPokemonClasses;
 
+    private static Pokemon[] mPokemons;
+
     public static void init() {
         mPokemonClasses = new Class[151];
         mPokemonClasses[0] = Bulbasaur.class;
@@ -164,6 +166,24 @@ public abstract class PokemonHelper {
         mPokemonClasses[148] = Dragonite.class;
         mPokemonClasses[149] = Mewtwo.class;
         mPokemonClasses[150] = Mew.class;
+
+        mPokemons = new Pokemon[151];
+        try {
+            for (int i = 0; i < 151; i++) {
+                Class c = mPokemonClasses[i];
+                mPokemons[i] = (Pokemon) c.getDeclaredConstructor().newInstance();
+                mPokemons[i].createDpsOffense();
+                mPokemons[i].createDpsDefense();
+            }
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Pokemon getPokemon(int id, LatLng loc, Date disappearTime) throws NullPointerException {
@@ -183,19 +203,8 @@ public abstract class PokemonHelper {
     }
 
     public static Pokemon getBasePokemon(int id) throws NullPointerException {
-        Class c = mPokemonClasses[id-1];
-        try {
-            return (Pokemon) c.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        throw new NullPointerException();
+        if (id > 151) throw new NullPointerException();
+        return mPokemons[id-1];
     }
 
 }

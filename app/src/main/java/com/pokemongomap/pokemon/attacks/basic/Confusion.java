@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class Confusion extends BasicAttack {
 
     public Confusion() {
-        super(235, 15, 1510, 14, TypeModifier.PSYCHIC);
+        super(235, 15, 1510, 14, TypeModifier.Type.PSYCHIC);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class HeartStamp extends ChargeAttack {
 
     public HeartStamp() {
-        super(34, 25, 2550, 25, 5.f, TypeModifier.PSYCHIC);
+        super(34, 25, 2550, 25, 5.f, TypeModifier.Type.PSYCHIC);
     }
 
 }

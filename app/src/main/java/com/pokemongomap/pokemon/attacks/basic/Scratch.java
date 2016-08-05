@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class Scratch extends BasicAttack {
 
     public Scratch() {
-        super(220, 6, 500, 7, TypeModifier.NORMAL);
+        super(220, 6, 500, 7, TypeModifier.Type.NORMAL);
     }
 
 }

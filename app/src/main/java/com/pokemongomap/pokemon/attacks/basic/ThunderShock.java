@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class ThunderShock extends BasicAttack {
 
     public ThunderShock() {
-        super(205, 5, 600, 8, TypeModifier.ELECTRIC);
+        super(205, 5, 600, 8, TypeModifier.Type.ELECTRIC);
     }
 
 }

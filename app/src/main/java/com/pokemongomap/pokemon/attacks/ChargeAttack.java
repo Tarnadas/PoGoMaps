@@ -9,9 +9,9 @@ public class ChargeAttack {
     private int mSpeed;
     private int mEnergyCost;
     private float mCritChance;
-    private TypeModifier mType;
+    private TypeModifier.Type mType;
 
-    public ChargeAttack(int id, int power, int speed, int energyCost, float critChance, TypeModifier type) {
+    public ChargeAttack(int id, int power, int speed, int energyCost, float critChance, TypeModifier.Type type) {
         mId = id;
         mPower = power;
         mSpeed = speed;
@@ -40,7 +40,7 @@ public class ChargeAttack {
         return mCritChance;
     }
 
-    public TypeModifier getType() {
+    public TypeModifier.Type getType() {
         return mType;
     }
 }

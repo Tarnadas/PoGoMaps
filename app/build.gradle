@@ -13,7 +13,7 @@ android {
     buildToolsVersion "23.0.3"
     defaultConfig {
         applicationId "com.pokemongomap.pokemongomap"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
@@ -37,9 +37,9 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.1.0'
     compile 'com.google.android.gms:play-services:9.2.1'
     compile 'com.android.support:multidex:+'
-    compile 'com.android.support:design:24.0.0'
-    compile 'com.android.support:support-v4:24.0.0'
+    compile 'com.android.support:design:24.1.0'
+    compile 'com.android.support:support-v4:24.1.0'
 }

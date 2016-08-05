@@ -53,6 +53,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static MapFragment mMapFragment;
 
     private static boolean appStart = true;
+    private static boolean mLocationReady = false;
 
     private static LatLngBounds mLastBounds;
 
@@ -64,9 +65,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private GroundOverlay mTrainer;
     private LocationReceiver mLocationReceiver;
 
-    private static boolean mMapReady = false;
-    private static boolean mLocationReady = false;
-    private static boolean mSleep = false;
+    private boolean mMapReady = false;
+    private boolean mSleep = false;
 
     private Map<Pokemon, GroundOverlay> mOverlays;
     private Map<Pokemon, Marker> mCountdowns;
@@ -107,6 +107,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
+        if (savedInstanceState != null) {
+            // Restore last state
+            String[] bounds = savedInstanceState.getString("bounds").split("_");
+            if (!bounds[0].equals("0")) {
+                //mMapFragment = this;
+                mLastBounds = new LatLngBounds(new LatLng(Double.parseDouble(bounds[0]), Double.parseDouble(bounds[1])),
+                        new LatLng(Double.parseDouble(bounds[2]), Double.parseDouble(bounds[3])));
+                /*mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mLastBounds, 0));
+                if (mTrainer != null) {
+                    mTrainer.remove();
+                }
+                LatLng loc = DatabaseConnection.getInstance().getLocation();
+                mTrainer = mMap.addGroundOverlay(new GroundOverlayOptions().position(loc, getDimTrainer()).clickable(false).
+                        image(BitmapDescriptorFactory.fromResource(R.drawable.trainer)));*/
+            } else {
+                IntentFilter statusIntentFilter = new IntentFilter(Constants.LOCATION_BROADCAST);
+                mLocationReceiver = new LocationReceiver();
+                LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mLocationReceiver, statusIntentFilter);
+            }
+        }
+
         FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.jump_to_location);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,6 +142,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        try {
+            mBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+            outState.putString("bounds", mBounds.southwest.latitude + "_" + mBounds.southwest.longitude + "_" + mBounds.northeast.latitude + "_" + mBounds.northeast.longitude);
+        } catch (NullPointerException | IllegalStateException e) {
+            outState.putString("bounds", "0");
+        }
     }
 
     @Override
@@ -362,6 +394,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 mMap.setOnCameraChangeListener(mMapFragment);
                             }
                         });
+                        DatabaseConnection.getInstance().saveLocation(loc);
                         mLocationReady = true;
                         appStart = false;
                     } else if (mTrainer != null) {

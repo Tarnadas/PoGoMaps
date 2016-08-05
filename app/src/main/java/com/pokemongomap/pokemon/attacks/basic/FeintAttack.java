@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class FeintAttack extends BasicAttack {
 
     public FeintAttack() {
-        super(238, 12, 1040, 10, TypeModifier.DARK);
+        super(238, 12, 1040, 10, TypeModifier.Type.DARK);
     }
 
 }

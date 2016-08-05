@@ -57,18 +57,22 @@ public class Metapod extends Pokemon {
 
     public Metapod() {
         super();
+        super.mResource = R.drawable.p11;
         super.HP_RATIO = HP_RATIO;
         super.ATTACK_RATIO = ATTACK_RATIO;
         super.DEFENSE_RATIO = DEFENSE_RATIO;
         super.MIN_CP = MIN_CP;
         super.MAX_CP = MAX_CP;
-        super.TYPE = TypeModifier.BUG;
+        super.TYPE = TypeModifier.Type.BUG;
+        super.TYPE_SECONDARY = TypeModifier.Type.NONE;
 
+        BASE_ATTACKS = new ArrayList<>();
         BASE_ATTACKS.add(BASE_ATTACK_1);
         if (BASE_ATTACK_1 != null) {
             BASE_ATTACKS.add(BASE_ATTACK_2);
         }
         super.BASE_ATTACKS = BASE_ATTACKS;
+        CHARGE_ATTACKS = new ArrayList<>();
         CHARGE_ATTACKS.add(CHARGE_ATTACK_1);
         if (CHARGE_ATTACK_2 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_2);
@@ -76,7 +80,7 @@ public class Metapod extends Pokemon {
         if (CHARGE_ATTACK_3 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_3);
         }
-        super.BASE_ATTACKS = BASE_ATTACKS;
+        super.CHARGE_ATTACKS = CHARGE_ATTACKS;
     }
 
     public Metapod(int id, LatLng loc, Date disappearTime) {

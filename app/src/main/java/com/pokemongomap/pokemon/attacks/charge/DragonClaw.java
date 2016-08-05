@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class DragonClaw extends ChargeAttack {
 
     public DragonClaw() {
-        super(83, 35, 1500, 50, 25.f, TypeModifier.DRAGON);
+        super(83, 35, 1500, 50, 25.f, TypeModifier.Type.DRAGON);
     }
 
 }

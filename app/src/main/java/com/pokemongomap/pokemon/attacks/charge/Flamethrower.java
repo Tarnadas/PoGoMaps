@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Flamethrower extends ChargeAttack {
 
     public Flamethrower() {
-        super(24, 55, 2900, 50, 5.f, TypeModifier.FIRE);
+        super(24, 55, 2900, 50, 5.f, TypeModifier.Type.FIRE);
     }
 
 }

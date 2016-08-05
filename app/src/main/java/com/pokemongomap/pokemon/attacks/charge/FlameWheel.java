@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class FlameWheel extends ChargeAttack {
 
     public FlameWheel() {
-        super(21, 40, 4600, 25, 5.f, TypeModifier.FIRE);
+        super(21, 40, 4600, 25, 5.f, TypeModifier.Type.FIRE);
     }
 
 }

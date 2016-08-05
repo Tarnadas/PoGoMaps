@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class HyperFang extends ChargeAttack {
 
     public HyperFang() {
-        super(129, 35, 2100, 33, 5.f, TypeModifier.NORMAL);
+        super(129, 35, 2100, 33, 5.f, TypeModifier.Type.NORMAL);
     }
 
 }

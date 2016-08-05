@@ -8,11 +8,11 @@ public class BasicAttack {
     private int mPower;
     private int mSpeed;
     private int mEnergy;
-    private TypeModifier mType;
+    private TypeModifier.Type mType;
     private float mDamagePerSecond;
     private float mEnergyPerSecond;
 
-    public BasicAttack(int id, int power, int speed, int energy, TypeModifier type) {
+    public BasicAttack(int id, int power, int speed, int energy, TypeModifier.Type type) {
         mId = id;
         mPower = power;
         mSpeed = speed;
@@ -38,7 +38,7 @@ public class BasicAttack {
         return mEnergy;
     }
 
-    public TypeModifier getType() {
+    public TypeModifier.Type getType() {
         return mType;
     }
 

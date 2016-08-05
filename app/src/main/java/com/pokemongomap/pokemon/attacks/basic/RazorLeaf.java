@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class RazorLeaf extends BasicAttack {
 
     public RazorLeaf() {
-        super(215, 15, 1450, 12, TypeModifier.GRASS);
+        super(215, 15, 1450, 12, TypeModifier.Type.GRASS);
     }
 
 }

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class AquaJet extends ChargeAttack {
 
     public AquaJet() {
-        super(57, 25, 2350, 20, 5.f, TypeModifier.WATER);
+        super(57, 25, 2350, 20, 5.f, TypeModifier.Type.WATER);
     }
 
 }

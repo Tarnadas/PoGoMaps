@@ -6,6 +6,10 @@
             android:id="@+id/nav_map"
             android:icon="@android:drawable/ic_dialog_map"
             android:title="Map" />
+        <item
+            android:id="@+id/nav_pokemon"
+            android:icon="@android:drawable/ic_dialog_info"
+            android:title="Pokémon" />
     </group>
 
 </menu>

@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class FlashCannon extends ChargeAttack {
 
     public FlashCannon() {
-        super(36, 60, 3900, 33, 5.f, TypeModifier.STEEL);
+        super(36, 60, 3900, 33, 5.f, TypeModifier.Type.STEEL);
     }
 
 }

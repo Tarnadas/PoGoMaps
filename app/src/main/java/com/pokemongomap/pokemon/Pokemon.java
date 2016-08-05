@@ -14,7 +14,11 @@ import java.util.Map;
 
 public abstract class Pokemon {
 
-    private static final float STAB_MODIFIER = 1.25f;
+    private static final double STAB_MODIFIER = 1.25;
+    private static final double CRIT_MODIFIER = 1.5; // unsure
+    private static final double CHARGE_TIME = 500;
+    private static final double CHARGE_TIME_DEFENSE = 2000;
+    private static final double ENERGY_PENALTY_DEFENSE = 1.d;
 
     private int mId;
     protected String mName;
@@ -29,13 +33,14 @@ public abstract class Pokemon {
     protected int DEFENSE_RATIO;
     protected int MIN_CP;
     protected int MAX_CP;
-    protected TypeModifier TYPE;
-    protected TypeModifier TYPE_SECONDARY;
+    protected TypeModifier.Type TYPE;
+    protected TypeModifier.Type TYPE_SECONDARY;
 
     protected List<BasicAttack> BASE_ATTACKS;
     protected List<ChargeAttack> CHARGE_ATTACKS;
 
-    private Map<Attacks, Float> mDpsList;
+    private Map<Attacks, Double> mDpsOffense;
+    private Map<Attacks, Double> mDpsDefense;
 
 
 
@@ -119,6 +124,14 @@ public abstract class Pokemon {
         return MAX_CP;
     }
 
+    public TypeModifier.Type getType() {
+        return TYPE;
+    }
+
+    public TypeModifier.Type getTypeSecondary() {
+        return TYPE_SECONDARY;
+    }
+
     public List<BasicAttack> getBaseAttacks() {
         return BASE_ATTACKS;
     }
@@ -127,36 +140,82 @@ public abstract class Pokemon {
         return CHARGE_ATTACKS;
     }
 
-    public void createDpsMap() {
-        mDpsList = new HashMap<>();
+    public void createDpsOffense() {
+        mDpsOffense = new HashMap<>();
         for (BasicAttack basicAttack : BASE_ATTACKS) {
+            double basicDamage = (double)basicAttack.getPower();
+            if (basicAttack.getType().equals(TYPE) || basicAttack.getType().equals(TYPE_SECONDARY)) {
+                basicDamage *= STAB_MODIFIER;
+            }
+            double damagePerFight = 100000.f / (double)basicAttack.getSpeed() * basicDamage;
+            mDpsOffense.put(new Attacks(basicAttack, null), damagePerFight);
             for (ChargeAttack chargeAttack : CHARGE_ATTACKS) {
-                float avgMovesToFillEnergy = (float)basicAttack.getEnergy() / (float)chargeAttack.getEnergyCost();
-                float basicDamage = (float)basicAttack.getPower();
+                basicDamage = (double)basicAttack.getPower();
                 if (basicAttack.getType().equals(TYPE) || basicAttack.getType().equals(TYPE_SECONDARY)) {
                     basicDamage *= STAB_MODIFIER;
                 }
-                float chargeDamage = (float)chargeAttack.getPower();
+                double chargeDamage = (double)chargeAttack.getPower() * (1 + CRIT_MODIFIER * (chargeAttack.getCritChance() / 100));
                 if (chargeAttack.getType().equals(TYPE) || chargeAttack.getType().equals(TYPE_SECONDARY)) {
                     chargeDamage *= STAB_MODIFIER;
                 }
-                float damagePerCycle = basicDamage * avgMovesToFillEnergy + chargeDamage;
-                float timePerCycleInMillis = (float)basicAttack.getSpeed() * avgMovesToFillEnergy + (float)chargeAttack.getSpeed();
-                float cyclesPerFight = 100000.f / timePerCycleInMillis;
-                float damagePerFight = cyclesPerFight * damagePerCycle;
-                mDpsList.put(new Attacks(basicAttack, chargeAttack), damagePerFight);
+                double avgMovesToFillEnergy = (double)chargeAttack.getEnergyCost() / (double)basicAttack.getEnergy();
+                double damagePerCycle = basicDamage * avgMovesToFillEnergy + chargeDamage;
+                double timePerCycleInMillis = (double)basicAttack.getSpeed() * avgMovesToFillEnergy + (double)chargeAttack.getSpeed() + CHARGE_TIME;
+                double cyclesPerFight = 100000.d / timePerCycleInMillis;
+                damagePerFight = cyclesPerFight * damagePerCycle;
+                mDpsOffense.put(new Attacks(basicAttack, chargeAttack), damagePerFight);
             }
         }
     }
 
-    public float getMaxDps() {
-        float maxDps = 0.f;
-        for (Float dps : mDpsList.values()) {
+    public double getMaxDpsOffense() {
+        double maxDps = 0.f;
+        for (Double dps : mDpsOffense.values()) {
             if (dps > maxDps) {
                 maxDps = dps;
             }
         }
         return maxDps;
+    }
+
+    public int getGymOffense() {
+        return ((Double)((getMaxDpsOffense() * ATTACK_RATIO * HP_RATIO * DEFENSE_RATIO) / 1000000)).intValue();
+    }
+
+    public void createDpsDefense() {
+        mDpsDefense = new HashMap<>();
+        for (BasicAttack basicAttack : BASE_ATTACKS) {
+            for (ChargeAttack chargeAttack : CHARGE_ATTACKS) {
+                double basicDamage = (double)basicAttack.getPower();
+                if (basicAttack.getType().equals(TYPE) || basicAttack.getType().equals(TYPE_SECONDARY)) {
+                    basicDamage *= STAB_MODIFIER;
+                }
+                double chargeDamage = (double)chargeAttack.getPower();
+                if (chargeAttack.getType().equals(TYPE) || chargeAttack.getType().equals(TYPE_SECONDARY)) {
+                    chargeDamage *= STAB_MODIFIER;
+                }
+                double avgMovesToFillEnergy = ((double)chargeAttack.getEnergyCost() * ENERGY_PENALTY_DEFENSE) / (double)basicAttack.getEnergy();
+                double damagePerCycle = basicDamage * avgMovesToFillEnergy + chargeDamage;
+                double timePerCycleInMillis = ((double)basicAttack.getSpeed() + CHARGE_TIME_DEFENSE) * avgMovesToFillEnergy + (double)chargeAttack.getSpeed() + CHARGE_TIME_DEFENSE;
+                double cyclesPerFight = 100000.d / timePerCycleInMillis;
+                double damagePerFight = cyclesPerFight * damagePerCycle;
+                mDpsDefense.put(new Attacks(basicAttack, chargeAttack), damagePerFight);
+            }
+        }
+    }
+
+    public double getMaxDpsDefense() {
+        double maxDps = 0.f;
+        for (Double dps : mDpsDefense.values()) {
+            if (dps > maxDps) {
+                maxDps = dps;
+            }
+        }
+        return maxDps;
+    }
+
+    public int getGymDefense() {
+        return ((Double)((getMaxDpsDefense() * ATTACK_RATIO * HP_RATIO * DEFENSE_RATIO) / 1000000)).intValue();
     }
 
     @Override

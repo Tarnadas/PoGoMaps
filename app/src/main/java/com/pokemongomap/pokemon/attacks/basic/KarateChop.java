@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class KarateChop extends BasicAttack {
 
     public KarateChop() {
-        super(208, 6, 800, 8, TypeModifier.FIGHTING);
+        super(208, 6, 800, 8, TypeModifier.Type.FIGHTING);
     }
 
 }

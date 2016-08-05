@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class Bite extends BasicAttack {
 
     public Bite() {
-        super(202, 6, 500, 7, TypeModifier.DARK);
+        super(202, 6, 500, 7, TypeModifier.Type.DARK);
     }
 
 }

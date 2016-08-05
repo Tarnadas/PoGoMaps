@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class SludgeBomb extends ChargeAttack {
 
     public SludgeBomb() {
-        super(90, 55, 2600, 50, 5.f, TypeModifier.POISON);
+        super(90, 55, 2600, 50, 5.f, TypeModifier.Type.POISON);
     }
 
 }

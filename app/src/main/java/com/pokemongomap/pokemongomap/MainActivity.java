@@ -32,6 +32,9 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, EasyPermissions.PermissionCallbacks {
 
+    private static String TAG = "fragment";
+
+    private Fragment mFragment;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -97,11 +100,22 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         DatabaseConnection.init(this);
         PokemonHelper.init();
         PokemonData.init();
         BitmapHelper.init();
+
+        if (savedInstanceState == null) {
+            DatabaseConnection.getInstance().purge();
+            mFragment = MapFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainContent, mFragment, TAG).commit();
+        } else {
+            mFragment = getSupportFragmentManager().findFragmentByTag(TAG);
+        }
+
 
         String[] perms;
         if(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -120,10 +134,8 @@ public class MainActivity extends AppCompatActivity
             startService(database);
         }
 
-        super.onCreate(savedInstanceState);
 
 
-        setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -146,8 +158,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.mainContent, MapFragment.newInstance()).commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -188,19 +203,19 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        Fragment fragment = null;
-
         switch (id) {
             case R.id.nav_map:
-                fragment = MapFragment.newInstance();
+                mFragment = MapFragment.newInstance();
                 break;
+            case R.id.nav_pokemon:
+                mFragment = PokemonFragment.newInstance();
             default:
                 break;
         }
 
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.mainContent, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.mainContent, mFragment, TAG).commit();
 
         // Highlight the selected item has been done by NavigationView
         item.setChecked(true);

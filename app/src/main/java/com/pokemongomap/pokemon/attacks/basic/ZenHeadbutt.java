@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class ZenHeadbutt extends BasicAttack {
 
     public ZenHeadbutt() {
-        super(234, 12, 1050, 9, TypeModifier.PSYCHIC);
+        super(234, 12, 1050, 9, TypeModifier.Type.PSYCHIC);
     }
 
 }

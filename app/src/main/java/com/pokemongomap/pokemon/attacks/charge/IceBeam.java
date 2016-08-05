@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class IceBeam extends ChargeAttack {
 
     public IceBeam() {
-        super(39, 65, 3650, 50, 5.f, TypeModifier.ICE);
+        super(39, 65, 3650, 50, 5.f, TypeModifier.Type.ICE);
     }
 
 }

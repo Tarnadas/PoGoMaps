@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class SteelWing extends BasicAttack {
 
     public SteelWing() {
-        super(239, 15, 1330, 12, TypeModifier.STEEL);
+        super(239, 15, 1330, 12, TypeModifier.Type.STEEL);
     }
 
 }

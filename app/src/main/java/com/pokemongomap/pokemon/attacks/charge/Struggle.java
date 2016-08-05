@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class Struggle extends ChargeAttack {
 
     public Struggle() {
-        super(133, 15, 1695, 20, 0.f, TypeModifier.NORMAL);
+        super(133, 15, 1695, 20, 0.f, TypeModifier.Type.NORMAL);
     }
 
 }

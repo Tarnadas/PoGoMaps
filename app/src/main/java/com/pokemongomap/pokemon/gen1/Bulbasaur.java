@@ -1,7 +1,9 @@
 package com.pokemongomap.pokemon.gen1;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.plus.model.people.Person;
 import com.pokemongomap.pokemon.Pokemon;
+import com.pokemongomap.pokemon.TypeModifier;
 import com.pokemongomap.pokemon.attacks.BasicAttack;
 import com.pokemongomap.pokemon.attacks.ChargeAttack;
 import com.pokemongomap.pokemon.attacks.basic.Tackle;
@@ -24,7 +26,7 @@ public class Bulbasaur extends Pokemon {
     private static int MIN_CP = 838;
     private static int MAX_CP = 1072;
 
-    private static List<BasicAttack> BASE_ATTACKS = new ArrayList<>();
+    private static List<BasicAttack> BASE_ATTACKS;
     private static BasicAttack BASE_ATTACK_1 = new Tackle();
     private static BasicAttack BASE_ATTACK_2 = new VineWhip();
     private static List<ChargeAttack> CHARGE_ATTACKS = new ArrayList<>();
@@ -34,17 +36,22 @@ public class Bulbasaur extends Pokemon {
 
     public Bulbasaur() {
         super();
+        super.mResource = R.drawable.p1;
         super.HP_RATIO = HP_RATIO;
         super.ATTACK_RATIO = ATTACK_RATIO;
         super.DEFENSE_RATIO = DEFENSE_RATIO;
         super.MIN_CP = MIN_CP;
         super.MAX_CP = MAX_CP;
+        super.TYPE = TypeModifier.Type.GRASS;
+        super.TYPE_SECONDARY = TypeModifier.Type.POISON;
 
+        BASE_ATTACKS = new ArrayList<>();
         BASE_ATTACKS.add(BASE_ATTACK_1);
         if (BASE_ATTACK_1 != null) {
             BASE_ATTACKS.add(BASE_ATTACK_2);
         }
         super.BASE_ATTACKS = BASE_ATTACKS;
+        CHARGE_ATTACKS = new ArrayList<>();
         CHARGE_ATTACKS.add(CHARGE_ATTACK_1);
         if (CHARGE_ATTACK_2 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_2);
@@ -52,7 +59,7 @@ public class Bulbasaur extends Pokemon {
         if (CHARGE_ATTACK_3 != null) {
             CHARGE_ATTACKS.add(CHARGE_ATTACK_3);
         }
-        super.BASE_ATTACKS = BASE_ATTACKS;
+        super.CHARGE_ATTACKS = CHARGE_ATTACKS;
     }
 
     public Bulbasaur(int id, LatLng loc, Date disappearTime) {

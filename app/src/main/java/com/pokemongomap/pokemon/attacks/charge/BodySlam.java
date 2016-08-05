@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class BodySlam extends ChargeAttack {
 
     public BodySlam() {
-        super(131, 40, 1560, 50, 5.f, TypeModifier.NORMAL);
+        super(131, 40, 1560, 50, 5.f, TypeModifier.Type.NORMAL);
     }
 
 }

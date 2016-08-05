@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.BasicAttack;
 public class BulletPunch extends BasicAttack {
 
     public BulletPunch() {
-        super(229, 10, 1200, 10, TypeModifier.STEEL);
+        super(229, 10, 1200, 10, TypeModifier.Type.STEEL);
     }
 
 }

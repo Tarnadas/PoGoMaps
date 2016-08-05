@@ -6,7 +6,7 @@ import com.pokemongomap.pokemon.attacks.ChargeAttack;
 public class BubbleBeam extends ChargeAttack {
 
     public BubbleBeam() {
-        super(53, 30, 2900, 25, 5.f, TypeModifier.WATER);
+        super(53, 30, 2900, 25, 5.f, TypeModifier.Type.WATER);
     }
 
 }
