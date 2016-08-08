@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -109,18 +111,32 @@ public class PokemonFragment extends Fragment {
         image.setAdjustViewBounds(true);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
+        // set name
+        LinearLayout linearView = (LinearLayout) pokeView.findViewById(R.id.pokemon_name_holder);
+        params = (RelativeLayout.LayoutParams) linearView.getLayoutParams();
+        params.leftMargin = IMAGE_SIZE;
+        params.topMargin = 0;
+        linearView.setLayoutParams(params);
+        TextView textView = ((TextView) pokeView.findViewById(R.id.pokemon_name));
+        textView.setTextColor(ContextCompat.getColor(getContext(), TypeModifier.getTypeColor(pokemon.getType())));
+        textView.setText("#" + (pokemon.getId()+1) + " " + pokemon.getName());
+        ViewGroup.LayoutParams layoutParams = textView.getLayoutParams();
+        layoutParams.width = width - IMAGE_SIZE;
+        textView.setLayoutParams(layoutParams);
+
         // set type
         GridLayout gridLayout = (GridLayout) pokeView.findViewById(R.id.types);
         params = new RelativeLayout.LayoutParams(width - IMAGE_SIZE, ROW_HEIGHT);
         params.leftMargin = IMAGE_SIZE;
-        params.topMargin = 0;
+        params.topMargin = ROW_HEIGHT;
         gridLayout.setLayoutParams(params);
 
-        TextView textView = ((TextView) pokeView.findViewById(R.id.type_primary));
+        textView = ((TextView) pokeView.findViewById(R.id.type_primary));
         textView.setText(pokemon.getType().toString().toLowerCase());
         textView.setBackground(TypeModifier.getBackground(getContext(), pokemon.getType()));
-        ViewGroup.LayoutParams layoutParams = textView.getLayoutParams();
+        layoutParams = textView.getLayoutParams();
         layoutParams.width = (width - IMAGE_SIZE) / 2;
+        layoutParams.height = ROW_HEIGHT;
         textView.setLayoutParams(layoutParams);
 
         if (pokemon.getTypeSecondary() != TypeModifier.Type.NONE) {
@@ -129,6 +145,7 @@ public class PokemonFragment extends Fragment {
             textView.setBackground(TypeModifier.getBackground(getContext(), pokemon.getTypeSecondary()));
             layoutParams = textView.getLayoutParams();
             layoutParams.width = (width - IMAGE_SIZE) / 2;
+            layoutParams.height = ROW_HEIGHT;
             textView.setLayoutParams(layoutParams);
         }
 
@@ -136,7 +153,7 @@ public class PokemonFragment extends Fragment {
         gridLayout = (GridLayout) pokeView.findViewById(R.id.gym);
         params = new RelativeLayout.LayoutParams(width - IMAGE_SIZE, ROW_HEIGHT);
         params.leftMargin = IMAGE_SIZE;
-        params.topMargin = ROW_HEIGHT;
+        params.topMargin = ROW_HEIGHT * 2;
         gridLayout.setLayoutParams(params);
 
         textView = ((TextView) pokeView.findViewById(R.id.gym_offense));
@@ -189,7 +206,7 @@ public class PokemonFragment extends Fragment {
         gridLayout = (GridLayout) pokeView.findViewById(R.id.cp);
         params = new RelativeLayout.LayoutParams(width - IMAGE_SIZE, ROW_HEIGHT);
         params.leftMargin = IMAGE_SIZE;
-        params.topMargin = ROW_HEIGHT * 2;
+        params.topMargin = ROW_HEIGHT * 3;
         gridLayout.setLayoutParams(params);
 
         textView = ((TextView) pokeView.findViewById(R.id.min_cp));
@@ -242,7 +259,7 @@ public class PokemonFragment extends Fragment {
         gridLayout = (GridLayout) pokeView.findViewById(R.id.stats);
         params = new RelativeLayout.LayoutParams(width - IMAGE_SIZE, ROW_HEIGHT);
         params.leftMargin = IMAGE_SIZE;
-        params.topMargin = ROW_HEIGHT * 3;
+        params.topMargin = ROW_HEIGHT * 4;
         gridLayout.setLayoutParams(params);
 
         textView = ((TextView) pokeView.findViewById(R.id.hitpoints));

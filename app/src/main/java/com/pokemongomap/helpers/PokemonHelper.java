@@ -1,5 +1,7 @@
 package com.pokemongomap.helpers;
 
+import android.content.Context;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.pokemongomap.pokemon.Pokemon;
 import com.pokemongomap.pokemon.gen1.*;
@@ -13,7 +15,7 @@ public abstract class PokemonHelper {
 
     private static Pokemon[] mPokemons;
 
-    public static void init() {
+    public static void init(Context context) {
         mPokemonClasses = new Class[151];
         mPokemonClasses[0] = Bulbasaur.class;
         mPokemonClasses[1] = Ivysaur.class;
@@ -171,7 +173,7 @@ public abstract class PokemonHelper {
         try {
             for (int i = 0; i < 151; i++) {
                 Class c = mPokemonClasses[i];
-                mPokemons[i] = (Pokemon) c.getDeclaredConstructor().newInstance();
+                mPokemons[i] = (Pokemon) c.getDeclaredConstructor(Context.class, int.class).newInstance(context, i);
                 mPokemons[i].createDpsOffense();
                 mPokemons[i].createDpsDefense();
             }
@@ -186,10 +188,10 @@ public abstract class PokemonHelper {
         }
     }
 
-    public static Pokemon getPokemon(int id, LatLng loc, Date disappearTime) throws NullPointerException {
+    public static Pokemon getPokemon(Context context, int id, LatLng loc, Date disappearTime) throws NullPointerException {
         Class c = mPokemonClasses[id-1];
         try {
-            return (Pokemon) c.getDeclaredConstructor(int.class, LatLng.class, Date.class).newInstance(id, loc, disappearTime);
+            return (Pokemon) c.getDeclaredConstructor(Context.class, int.class, LatLng.class, Date.class).newInstance(context, id, loc, disappearTime);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

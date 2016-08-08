@@ -1,6 +1,7 @@
 package com.pokemongomap.pokemon;
 
 
+import android.content.Context;
 import android.database.CursorIndexOutOfBoundsException;
 import android.util.Log;
 
@@ -40,8 +41,11 @@ public final class PokemonData {
 
     private static volatile Queue<Pokemon> mPokemon;
 
-    public static void init() {
+    private static Context mContext;
+
+    public static void init(Context context) {
         mPokemon = new ConcurrentLinkedQueue<>();
+        mContext = context;
         Timer timerFetch = new Timer();
         PokemonDataFetchTask fetchTask = mPokemonData.new PokemonDataFetchTask();
         timerFetch.schedule(fetchTask, 0, SLEEP_TIME_FETCH);
@@ -131,7 +135,7 @@ public final class PokemonData {
 
                     // add new ones
                     try {
-                        Pokemon pokemon = PokemonHelper.getPokemon(id, loc, cal.getTime());
+                        Pokemon pokemon = PokemonHelper.getPokemon(mContext, id, loc, cal.getTime());
                         if (!mPokemon.contains(pokemon))
                             mPokemon.add(pokemon);
                     } catch (NullPointerException e) {

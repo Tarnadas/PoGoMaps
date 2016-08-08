@@ -1,6 +1,9 @@
 package com.pokemongomap.pokemon;
 
 
+import android.content.Context;
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.pokemongomap.pokemon.attacks.Attacks;
 import com.pokemongomap.pokemon.attacks.BasicAttack;
@@ -20,14 +23,13 @@ public abstract class Pokemon {
     private static final double CHARGE_TIME_DEFENSE = 2000;
     private static final double ENERGY_PENALTY_DEFENSE = 1.d;
 
-    private int mId;
-    protected String mName;
     private LatLng mLoc;
     private Date mDisappearTime;
     protected int mResource;
 
 
-
+    private int mId;
+    protected String mName;
     protected int HP_RATIO;
     protected int ATTACK_RATIO;
     protected int DEFENSE_RATIO;
@@ -52,6 +54,13 @@ public abstract class Pokemon {
     protected Attacks mAttacks;
 
     public Pokemon() {
+
+    }
+
+    public Pokemon(Context context, int id) {
+        mId = id;
+        String identifier = Thread.currentThread().getStackTrace()[3].getClassName().split("\\.")[4].toLowerCase();
+        mName = context.getString(context.getResources().getIdentifier(identifier, "string", context.getPackageName()));
     }
 
     public Pokemon(int id, LatLng loc, Date disappearTime) {

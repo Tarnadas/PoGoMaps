@@ -100,4 +100,47 @@ public abstract class TypeModifier {
         }
     }
 
+    public static int getTypeColor(Type type) {
+        switch (type) {
+            case BUG:
+                return R.color.bug;
+            case DARK:
+                return R.color.dark;
+            case DRAGON:
+                return R.color.dragon;
+            case ELECTRIC:
+                return R.color.electric;
+            case FAIRY:
+                return R.color.fairy;
+            case FIGHTING:
+                return R.color.fighting;
+            case FIRE:
+                return R.color.fire;
+            case FLYING:
+                return R.color.flying;
+            case GHOST:
+                return R.color.ghost;
+            case GRASS:
+                return R.color.grass;
+            case GROUND:
+                return R.color.ground;
+            case ICE:
+                return R.color.ice;
+            case NORMAL:
+                return R.color.normal;
+            case POISON:
+                return R.color.poison;
+            case PSYCHIC:
+                return R.color.psychic;
+            case ROCK:
+                return R.color.rock;
+            case STEEL:
+                return R.color.steel;
+            case WATER:
+                return R.color.water;
+            default:
+                return R.color.normal;
+        }
+    }
+
 }

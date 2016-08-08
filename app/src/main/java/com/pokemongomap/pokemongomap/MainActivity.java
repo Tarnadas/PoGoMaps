@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         DatabaseConnection.init(this);
-        PokemonHelper.init();
-        PokemonData.init();
+        PokemonHelper.init(getApplicationContext());
+        PokemonData.init(getApplicationContext());
         BitmapHelper.init();
 
         if (savedInstanceState == null) {

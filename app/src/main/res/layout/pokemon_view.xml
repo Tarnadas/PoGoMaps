@@ -9,6 +9,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <LinearLayout
+        android:id="@+id/pokemon_name_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/pokemon_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="30px"/>
+    </LinearLayout>
+
     <GridLayout
         android:id="@+id/types"
         android:layout_width="wrap_content"
