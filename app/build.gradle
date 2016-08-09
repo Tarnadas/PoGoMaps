@@ -35,11 +35,16 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile files('libs/PokeGOAPI-library-all-0.3.0.jar')
+    //compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    //compile files('C:/Users/Mario/AndroidStudioProjects/PokeGOAPI-Java/build/libs/PokeGOAPI-0.3.0.jar')
+    //compile 'com.pokegoapi:PokeGOAPI-library:0.3.4'
+    //compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.android.support:appcompat-v7:24.1.0'
     compile 'com.google.android.gms:play-services:9.2.1'
     compile 'com.android.support:multidex:+'
     compile 'com.android.support:design:24.1.0'
     compile 'com.android.support:support-v4:24.1.0'
+    //compile project(':PokeGOAPI-0.3.0')
 }

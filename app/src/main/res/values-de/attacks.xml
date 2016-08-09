@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feintattack">Finte</string>
     <string name="circlethrow">Überkopfwurf</string>
     <string name="incinerate">Einäschern</string>
     <string name="quash">Verzögerung</string>
@@ -59,7 +58,6 @@
     <string name="wonderroom">Wunderraum</string>
     <string name="psyshock">Psychoschock</string>
     <string name="venoshock">Giftschock</string>
-    <string name="automize">Autotomie</string>
     <string name="ragepowder">Wutpulver</string>
     <string name="telekinesis">Telekinese</string>
     <string name="magicroom">Magieraum</string>

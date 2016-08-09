@@ -170,21 +170,26 @@ public abstract class PokemonHelper {
         mPokemonClasses[150] = Mew.class;
 
         mPokemons = new Pokemon[151];
-        try {
-            for (int i = 0; i < 151; i++) {
+        for (int i = 0; i < 151; i++) {
+            try {
                 Class c = mPokemonClasses[i];
-                mPokemons[i] = (Pokemon) c.getDeclaredConstructor(Context.class, int.class).newInstance(context, i);
+                mPokemons[i] = (Pokemon) c.getDeclaredConstructor(Context.class, int.class).newInstance(context, i+1);
                 mPokemons[i].createDpsOffense();
                 mPokemons[i].createDpsDefense();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                Class c = mPokemonClasses[0];
+                try {
+                    mPokemons[i] = (Pokemon) c.getDeclaredConstructor(Context.class, int.class).newInstance(context, 1);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e1) {
+                    e1.printStackTrace();
+                }
             }
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
         }
     }
 
@@ -199,9 +204,14 @@ public abstract class PokemonHelper {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            /*c = mPokemonClasses[0];
+            try {
+                return (Pokemon) c.getDeclaredConstructor(Context.class, int.class, LatLng.class, Date.class).newInstance(context, 1, loc, disappearTime);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e1) {
+                e1.printStackTrace();
+            }*/
         }
-        throw new NullPointerException();
+        return null;
     }
 
     public static Pokemon getBasePokemon(int id) throws NullPointerException {

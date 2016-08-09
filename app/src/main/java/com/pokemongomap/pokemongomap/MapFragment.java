@@ -111,16 +111,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             // Restore last state
             String[] bounds = savedInstanceState.getString("bounds").split("_");
             if (!bounds[0].equals("0")) {
-                //mMapFragment = this;
                 mLastBounds = new LatLngBounds(new LatLng(Double.parseDouble(bounds[0]), Double.parseDouble(bounds[1])),
                         new LatLng(Double.parseDouble(bounds[2]), Double.parseDouble(bounds[3])));
-                /*mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mLastBounds, 0));
-                if (mTrainer != null) {
-                    mTrainer.remove();
-                }
-                LatLng loc = DatabaseConnection.getInstance().getLocation();
-                mTrainer = mMap.addGroundOverlay(new GroundOverlayOptions().position(loc, getDimTrainer()).clickable(false).
-                        image(BitmapDescriptorFactory.fromResource(R.drawable.trainer)));*/
             } else {
                 IntentFilter statusIntentFilter = new IntentFilter(Constants.LOCATION_BROADCAST);
                 mLocationReceiver = new LocationReceiver();

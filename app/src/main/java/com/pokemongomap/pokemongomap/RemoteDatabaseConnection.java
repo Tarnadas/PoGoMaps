@@ -87,6 +87,55 @@ public abstract class RemoteDatabaseConnection {
         return response;
     }
 
+    public static String[] getAccounts(int amount) {
+        URL url;
+        HttpURLConnection urlConnection = null;
+        String[] response;
+        try {
+            String urlString = "http://" + SERVER_IP + "/" + SERVER_PHP_PAGE + "?getaccounts=1&amount=" + amount;
+            url = new URL(urlString);
+            urlConnection = (HttpURLConnection)url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestProperty("Key", KEY);
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            response = convertStreamToString(in).split(" ");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (urlConnection != null) urlConnection.disconnect();
+        }
+        if (response == null) {
+            throw new NullPointerException();
+        }
+        return response;
+    }
+
+    public static void updateAccounts(String[] accounts) {
+        URL url;
+        HttpURLConnection urlConnection = null;
+        try {
+            String a = accounts[0].split(":")[0];
+            for (int i = 1; i < accounts.length; i++) {
+                a += "_" + accounts[i].split(":")[0];
+            }
+            String urlString = "http://" + SERVER_IP + "/" + SERVER_PHP_PAGE + "?updateaccounts=1&accounts=" + a;
+            url = new URL(urlString);
+            urlConnection = (HttpURLConnection)url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestProperty("Key", KEY);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (urlConnection != null) urlConnection.disconnect();
+        }
+    }
+
     private static String convertStreamToString(InputStream is) {
         String line;
         StringBuilder total = new StringBuilder();
