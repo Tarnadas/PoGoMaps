@@ -84,11 +84,11 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         }
 
         LocationRequest mLocationRequest = new LocationRequest();
-        //mLocationRequest.setInterval(20000);
-        mLocationRequest.setInterval(500);
+        mLocationRequest.setInterval(20000);
+        //mLocationRequest.setInterval(500);
         mLocationRequest.setFastestInterval(500);
-        //mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        //mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
         PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
