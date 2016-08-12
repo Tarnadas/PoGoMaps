@@ -48,14 +48,13 @@ public final class PokemonData {
     private static final long SLEEP_TIME_SEARCH = 10500;
 
     private static final int SCAN_THREADS = 10;
-    private static final int RADIUS = 5;
-    private static final int MIN_QUEUE_OVERHEAD = 40;
-    private static final long IN_USE_THRESHOLD = 30000;
+    private static final int RADIUS = 4;
+    private static final long IN_USE_THRESHOLD = 180000;
     private static final long TIME_TO_RELOGIN = 1800000;
 
     private static final double mDisplacement = getDisplacement();
 
-    private static final Path[] PATHS = createPaths(RADIUS);
+    private static final Cell[] CELLS = createCells(RADIUS);
 
     private static String[] ACCOUNTS;
 
@@ -70,9 +69,11 @@ public final class PokemonData {
 
     private static Queue<LatLng> mLocationQueue = new ConcurrentLinkedQueue<>();
 
-    private static Path[] mPaths;
+    private static List<Cell> mCells = new LinkedList<>();
 
     private static LatLng mCurrentLocation;
+
+    private static Cell mCurrentCell;
 
     public static void init(Context context) {
         mPokemon = new ConcurrentLinkedQueue<>();
@@ -218,19 +219,17 @@ public final class PokemonData {
                     }
                     mCurrentLocation = DatabaseConnection.getInstance().getLocation();
                 }
-                if (mPaths != null) {
-                    realign(getClosest(mCurrentLocation));
-                } else {
-                    realign(mCurrentLocation);
-                }
             }
+            Cell closest = getClosest(mCurrentLocation, mCells);
+            realign(mCurrentLocation, closest);
+            mCurrentCell = closest;
 
             // populate queue
-            for (int i = 0; i < MIN_QUEUE_OVERHEAD; i++) {
-                if (mLocationQueue.size() < MIN_QUEUE_OVERHEAD) {
-                    Path path = getClosestNotInUse();
-                    if (path != null) {
-                        mLocationQueue.add(path.getTarget());
+            for (int i = 0; i < SCAN_THREADS; i++) {
+                if (mLocationQueue.size() < SCAN_THREADS) {
+                    Cell cell = getClosestNotInUse();
+                    if (cell != null) {
+                        mLocationQueue.add(cell.getTarget());
                     } else {
                         break;
                     }
@@ -243,7 +242,9 @@ public final class PokemonData {
                 if (loc != null) {
                     String[] accountInfo = ACCOUNTS[i].split(":");
                     ExecutorService executor = Executors.newCachedThreadPool();
-                    executor.submit(new PokemonGetTask(i, loc, accountInfo[0], accountInfo[1]));
+                    executor.submit(new PokemonGetTask(i, loc, accountInfo[0], "2wsxyaq1"));
+                } else {
+                    break;
                 }
             }
         }
@@ -311,21 +312,66 @@ public final class PokemonData {
         return 70 * Math.sqrt(3);
     }
 
-    public static void realign(LatLng source) {
-        Path[] newPaths = PATHS.clone();
-        for (int i = 0; i < newPaths.length; i++) {
-            setDisplacementEstimateFromPath(source, mDisplacement, newPaths[i], newPaths);
+    private static void realign(LatLng location, Cell cellSource) {
+        List<Cell> newCells = new LinkedList<>(mCells) ;
+        if (cellSource == null) {
+            for (Cell cell : CELLS) {
+                newCells.add(new Cell(cell));
+            }
+            newCells.get(0).setSource(location);
+            newCells.get(0).setTarget(location);
+        } else {
+            LatLng cellLocation = cellSource.getTarget();
+            while (distanceInMeter(location, cellLocation) > getDisplacement()) {
+                if (cellSource != null && !cellSource.equals(mCurrentCell)) {
+                    for (Cell cell : newCells) {
+                        if (isCellInRange(cell, cellLocation)) {
+                            cell.recreatePath(cellSource);
+                        }
+                    }
+                }
+                if (mCells.size() == 0 || cellSource != null) {
+                    List<Cell> compareCells = new LinkedList<>(newCells);
+                    for (Cell cell : CELLS) {
+                        boolean contained = false;
+                        for (Cell oldCell : compareCells) {
+                            if (oldCell.hasPath(cell)) {
+                                contained = true;
+                                break;
+                            }
+                        }
+                        if (!contained) {
+                            newCells.add(new Cell(cell));
+                        }
+                    }
+                }
+                cellSource = getClosest(cellLocation, newCells);
+                cellLocation = cellSource.getTarget();
+            }
         }
-        mPaths = newPaths;
+
+
+        for (Cell cell : newCells) {
+            if (cell.getPath().size() == 0) {
+                cellSource = cell;
+                break;
+            }
+        }
+        for (Cell c : newCells) {
+            if (c.getTarget() == null) {
+                setDisplacementEstimateFromCell(c, cellSource, mDisplacement, newCells);
+            }
+        }
+        mCells = newCells;
     }
 
-    private static Path[] createPaths(int radius) {
+    private static Cell[] createCells(int radius) {
         int size = 1;
         for (int i = 0; i < radius;) {
             i++;
             size += i * 6;
         }
-        Path[] result = new Path[size];
+        Cell[] result = new Cell[size];
         int a = -1, b = 0, c = 0;
         for (int i = 0; i < result.length; i++) {
             if (++a > b) {
@@ -361,27 +407,47 @@ public final class PokemonData {
                 if (index >= bits.length) index -= bits.length;
                 push[j] = bits[index];
             }
-            result[i] = new Path(push);
+            result[i] = new Cell(push);
 
         }
         return result;
     }
 
-    private static void setDisplacementEstimateFromPath(LatLng loc, double displacement, Path path, Path[] paths) {
+    private static LatLng getDisplacementEstimate(Cell cell, double displacement, double alpha) {
 
         //Earth’s radius, sphere
         double earthRadius = 6378137;
 
-        Path preceding = path.getPreceding(paths);
+        //offsets in meters
+        double dLatM = Math.sin(alpha) * displacement;
+        double dLonM = Math.cos(alpha) * displacement;
+
+        //Coordinate offsets in radians
+        double dLat = dLatM / earthRadius;
+        double dLon = dLonM / (earthRadius * Math.cos(Math.PI * cell.getTarget().latitude / 180));
+
+        //OffsetPosition, decimal degrees
+        double newLat = cell.getTarget().latitude + dLat * 180 / Math.PI;
+        double newLon = cell.getTarget().longitude + dLon * 180 / Math.PI;
+
+        return new LatLng(newLat, newLon);
+    }
+
+    private static void setDisplacementEstimateFromCell(Cell cell, Cell sourceCell, double displacement, List<Cell> cells) {
+
+        //Earth’s radius, sphere
+        double earthRadius = 6378137;
+
+        Cell preceding = cell.getPreceding(cells);
         LatLng source;
         if (preceding == null) {
-            path.setSource(loc);
-            path.setTarget(loc);
+            cell.setSource(sourceCell.getSource());
+            cell.setTarget(sourceCell.getSource());
             return;
         }
         source = preceding.getTarget();
 
-        double alpha = path.getLast() * Math.PI / 3;
+        double alpha = cell.getPath().get(cell.getPath().size()-1) * Math.PI / 3;
 
         //offsets in meters
         double dLatM = Math.sin(alpha) * displacement;
@@ -395,8 +461,14 @@ public final class PokemonData {
         double newLat = source.latitude + dLat * 180 / Math.PI;
         double newLon = source.longitude + dLon * 180 / Math.PI;
 
-        path.setSource(loc);
-        path.setTarget(new LatLng(newLat, newLon));
+        cell.setSource(sourceCell.getSource());
+        cell.setTarget(new LatLng(newLat, newLon));
+    }
+
+    private static boolean isCellInRange(Cell cell, LatLng loc) {
+        boolean inRange = distanceInMeter(cell.getTarget(), loc) < (RADIUS+1) * getDisplacement();
+        cell.setInRange(inRange);
+        return inRange;
     }
 
     private static double distance(LatLng loc0, LatLng loc1) {
@@ -405,28 +477,50 @@ public final class PokemonData {
         return Math.sqrt(dLat * dLat + dLon * dLon);
     }
 
-    private static LatLng getClosest(LatLng loc) {
-        LatLng result = loc;
-        double minDistance = -1;
-        for (Path path : mPaths) {
-            LatLng target = path.getTarget();
+    private static double distanceInMeter(LatLng loc1, LatLng loc2) {
+        double R = 6378.137; // Radius of earth in KM
+        double dLat = (loc2.latitude - loc1.latitude) * Math.PI / 180;
+        double dLon = (loc2.longitude - loc1.longitude) * Math.PI / 180;
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(loc1.latitude * Math.PI / 180) * Math.cos(loc2.latitude * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = R * c;
+        return d * 1000; // meters
+    }
+
+    private static Cell getRealClosest(LatLng loc) {
+        for (Cell cell : mCells) {
+            LatLng target = cell.getTarget();
+            if (Math.abs(target.latitude-loc.latitude) < 0.000000001 && Math.abs(target.longitude-loc.longitude) < 0.000000001) {
+                return cell;
+            }
+        }
+        return null;
+    }
+
+    private static Cell getClosest(LatLng loc, List<Cell> cells) {
+        Cell result = null;
+        double minDistance = Integer.MAX_VALUE;
+        for (Cell cell : cells) {
+            LatLng target = cell.getTarget();
             double distance = distance(target, loc);
             if (distance < minDistance || minDistance < 0) {
-                result = target;
+                result = cell;
                 minDistance = distance;
             }
         }
         return result;
     }
 
-    private static Path getClosestNotInUse() {
-        Path result = null;
+    private static Cell getClosestNotInUse() {
+        Cell result = null;
         double closestDistance = -1;
-        for (Path path : mPaths) {
-            if (path.isInUse()) continue;
-            double distance = distance(path.getTarget(), mCurrentLocation);
+        for (Cell cell : mCells) {
+            if (cell.isInUse()) continue;
+            if (!cell.isInRange()) continue;
+            double distance = distance(cell.getTarget(), mCurrentLocation);
             if (closestDistance == -1 || distance < closestDistance) {
-                result = path;
+                result = cell;
                 closestDistance = distance;
             }
         }
@@ -435,28 +529,32 @@ public final class PokemonData {
         return result;
     }
 
-    private static class Path {
-        private List<Integer> path = new LinkedList<>();
+    private static class Cell {
+        private List<Integer> mPath;
         private LatLng mSource, mTarget;
         private Date timeStamp;
-        public Path(int[] ints) {
+        private boolean mInRange = true;
+        public Cell(int[] ints) {
+            mPath = new LinkedList<>();
             for (int i = 0; i < ints.length; i++) {
-                path.add(ints[i]);
+                mPath.add(ints[i]);
+            }
+            Iterator<Integer> it = mPath.iterator();
+            while (it.hasNext()) {
+                int i = it.next();
+                if (i == -1) {
+                    it.remove();
+                }
+            }
+        }
+        public Cell(Cell copyCell) {
+            mPath = new LinkedList<>();
+            for (int i : copyCell.getPath()) {
+                mPath.add(i);
             }
         }
         public List<Integer> getPath() {
-            return path;
-        }
-        public int getLast() {
-            int last = -1;
-            for (int i : path) {
-                if (i != -1) {
-                    last = i;
-                } else {
-                    break;
-                }
-            }
-            return last;
+            return mPath;
         }
         public LatLng getSource() {
             return mSource;
@@ -483,34 +581,134 @@ public final class PokemonData {
         public void use() {
             timeStamp = new Date();
         }
-        public boolean isPreceding(Path path) {
-            if (this.equals(path)) return false;
-            int count = 0;
-            boolean result = true;
-            for (int i : path.getPath()) {
-                if (i == -1) return false;
-                int j = getPath().get(count++);
-                if (j == -1 && path.getPath().get(count) == -1) {
-                    return result;
-                } else if (i != j) {
-                    result = false;
+        public boolean isInRange() {
+            return mInRange;
+        }
+        public void setInRange(boolean inRange) {
+            mInRange = inRange;
+        }
+        public Cell getAdjacentCell(int direction) {
+            return getRealClosest(getDisplacementEstimate(this, getDisplacement(), direction * Math.PI/3));
+        }
+        public void recreatePath(Cell cell) {
+
+            mSource = cell.getTarget();
+            List<Integer> newPath = new LinkedList<>();
+            Cell currentCell = cell;
+
+            int a = -1, b = -1;
+            while (!currentCell.equals(this)) {
+                int direction;
+                double arc = Math.atan2(getTarget().latitude-currentCell.getTarget().latitude, getTarget().longitude-currentCell.getTarget().longitude);
+                if (arc >= -Math.PI/6 && arc <= Math.PI/6) {
+                    direction = 0;
+                } else if (arc >= Math.PI/6 && arc <= Math.PI*1/2) {
+                    direction = 1;
+                } else if (arc >= Math.PI*1/2 && arc <= Math.PI*5/6) {
+                    direction = 2;
+                } else if (arc >= Math.PI*5/6 && arc <= Math.PI*7/6) {
+                    direction = 3;
+                } else if (arc >= Math.PI*7/6 && arc <= Math.PI*3/2) {
+                    direction = 4;
+                } else {
+                    direction = 5;
+                }
+                if (a == -1) {
+                    a = direction;
+                    b = direction;
+                } else if (a != direction) {
+                    b = direction;
+                }
+                if (Math.abs(a-b) > 1 && !((a == 0 && b == 5) || (a == 5 && b == 0))) break;
+                if (a != direction && b != direction)  break;
+                newPath.add(direction);
+                if (newPath.size() == mPath.size() + cell.getPath().size()) break;
+                Cell nextCell = currentCell.getAdjacentCell(direction);
+                if (nextCell == null || nextCell.equals(currentCell)) {
+                    break;
+                }
+                currentCell = nextCell;
+            }
+            List<Integer> orderedPath = new LinkedList<>();
+            int hi = 0;
+            int lo = 5;
+            if (a < lo) lo = a;
+            if (b < lo) lo = b;
+            if (a > hi) hi = a;
+            if (b > hi) hi = b;
+            for (int i : newPath) {
+                if (i < lo) lo = i;
+            }
+            for (int i : newPath) {
+                if (i > hi) hi = i;
+            }
+            for (int i : newPath) {
+                if (lo == 0 && hi == 5) {
+                    if (i == hi) {
+                        orderedPath.add(0, i);
+                    } else {
+                        orderedPath.add(i);
+                    }
+                } else {
+                    if (i == hi) {
+                        orderedPath.add(i);
+                    } else {
+                        orderedPath.add(0, i);
+                    }
                 }
             }
-            return false;
+
+            if (orderedPath.size() == 0) {
+                mTarget = cell.getTarget();
+            }
+            mPath = orderedPath;
         }
-        public Path getPreceding(Path[] paths) {
-            if (paths == null) return null;
-            for (Path path : paths) {
-                if (path.isPreceding(this)) {
-                    return path;
+        public boolean isPreceding(Cell cell) {
+            if (this.equals(cell) || getPath().size() >= cell.getPath().size()) {
+                return false;
+            }
+            int count = cell.getPathCount() - cell.getPath().get(cell.getPath().size()-1);
+            if (count != getPathCount()) {
+                return false;
+            }
+            return cell.getPath().size() == mPath.size()+1;
+        }
+        public Cell getPreceding(List<Cell> cells) {
+            if (cells == null || getPath().size() == 0) return null;
+            for (Cell cell : cells) {
+                if (cell.isPreceding(this)) {
+                    return cell;
                 }
             }
             return null;
         }
+        public int getPathCount() {
+            int count = 0;
+            for (int i : mPath) {
+                count += i;
+            }
+            return count;
+        }
+        public boolean hasPath(Object obj) {
+            if (!(obj instanceof  Cell)) return false;
+            Cell cell = (Cell) obj;
+            int pathCount = cell.getPathCount();
+            if (getPathCount() == pathCount && getPath().size() == cell.getPath().size()) {
+                return true;
+            }
+            return false;
+        }
+        @Override
+        public boolean equals (Object obj) {
+            if (!(obj instanceof  Cell)) return false;
+            Cell cell = (Cell) obj;
+            return cell.getTarget() != null && mTarget != null && Math.abs(cell.getTarget().latitude - mTarget.latitude) < 0.00000000000000001d &&
+                    Math.abs(cell.getTarget().longitude - mTarget.longitude) < 0.000000000000000001d;
+        }
         @Override
         public int hashCode() {
             int result = 0;
-            for (int i : path) {
+            for (int i : mPath) {
                 result = (result << 3) | i;
             }
             return result;

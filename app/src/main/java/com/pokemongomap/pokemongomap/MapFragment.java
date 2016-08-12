@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener {
 
-    private static final int DEFAULT_ZOOM = 15;
+    private static final int DEFAULT_ZOOM = 16;
 
     private static final float ZOOM_SHRINK = 1.2f;
     private static final float ZOOM_MULT = 20.f;
@@ -53,7 +53,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private static MapFragment mMapFragment;
 
     private static boolean appStart = true;
-    private static boolean mLocationReady = false;
 
     private static LatLngBounds mLastBounds;
 
@@ -184,21 +183,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         Intent intent = new Intent(getActivity(), LocationIntentService.class);
         getActivity().startService(intent);
 
-        if (mLocationReady) {
+        LatLng loc;
+        try {
+            loc = DatabaseConnection.getInstance().getLocation();
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mLocationReceiver);
             mMapFragment = MapFragment.this;
-            LatLng loc = DatabaseConnection.getInstance().getLocation();
             if (mTrainer == null) {
                 mTrainer = mMap.addGroundOverlay(new GroundOverlayOptions().position(loc, getDimTrainer()).clickable(false).
                         image(BitmapDescriptorFactory.fromResource(R.drawable.trainer)));
             }
-            if (mLastBounds != null) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mLastBounds, 0));
+            if (appStart) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, DEFAULT_ZOOM));
             } else {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, DEFAULT_ZOOM));
+                if (mLastBounds != null) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mLastBounds, 0));
+                } else {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, DEFAULT_ZOOM));
+                }
             }
             mMap.setOnCameraChangeListener(MapFragment.this);
-        } else {
-            // something went wrong
+            appStart = false;
+        } catch (CursorIndexOutOfBoundsException e) {
+            // handled by location receiver
         }
     }
 
@@ -387,7 +393,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             }
                         });
                         DatabaseConnection.getInstance().saveLocation(loc);
-                        mLocationReady = true;
                         appStart = false;
                     } else if (mTrainer != null) {
                         getActivity().runOnUiThread(new Runnable() {

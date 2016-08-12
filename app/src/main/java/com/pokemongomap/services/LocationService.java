@@ -31,6 +31,9 @@ import java.io.Serializable;
 public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, ResultCallback<LocationSettingsResult>, Serializable {
 
+    private static final long LOCATION_INTERVAL = 500;
+    private static final int  LOCATION_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
+
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;
 
@@ -81,14 +84,15 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mCurrentLocation != null) {
             DatabaseConnection.getInstance().saveLocation(mCurrentLocation);
+
+            Intent localIntent = new Intent(Constants.LOCATION_BROADCAST).putExtra(Constants.LOCATION_STATUS, mCurrentLocation.getLatitude() + " " + mCurrentLocation.getLongitude());
+            LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
         }
 
         LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(20000);
-        //mLocationRequest.setInterval(500);
+        mLocationRequest.setInterval(LOCATION_INTERVAL);
         mLocationRequest.setFastestInterval(500);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        //mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setPriority(LOCATION_PRIORITY);
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
         PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
