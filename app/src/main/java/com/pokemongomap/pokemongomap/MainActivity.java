@@ -151,7 +151,6 @@ public class MainActivity extends AppCompatActivity
         // Highlight the selected item has been done by NavigationView
         MenuItem item = navigationView.getMenu().getItem(0);
         item.setChecked(true);
-        setTitle(item.getTitle());
 
     }
 
@@ -219,7 +218,6 @@ public class MainActivity extends AppCompatActivity
 
         // Highlight the selected item has been done by NavigationView
         item.setChecked(true);
-        setTitle(item.getTitle());
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
