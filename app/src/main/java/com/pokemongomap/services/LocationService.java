@@ -31,8 +31,8 @@ import java.io.Serializable;
 public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, ResultCallback<LocationSettingsResult>, Serializable {
 
-    private static final long LOCATION_INTERVAL = 500;
-    private static final int  LOCATION_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
+    private static final long LOCATION_INTERVAL = 20000;
+    private static final int  LOCATION_PRIORITY = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 
     private GoogleApiClient mGoogleApiClient;
     private Location mCurrentLocation;

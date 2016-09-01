@@ -1,153 +1,102 @@
 package com.pokemongomap.pokemongomap;
 
-import com.google.android.gms.maps.model.LatLng;
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
+
+import de.tavendo.autobahn.WebSocketConnection;
+import de.tavendo.autobahn.WebSocketException;
+import de.tavendo.autobahn.WebSocketHandler;
 
 public abstract class RemoteDatabaseConnection {
 
-    public static String KEY = "dsa78adhU9410ASd4lkO";
+    private static String TAG = "ALTER";
 
-    public static String SERVER_IP = "89.163.173.74";
+    private static String WS_URI = "ws://tarnadas.ddns.net:5000/";
 
-    public static String SERVER_PHP_PAGE = "app/pogo.php";
+    private static final WebSocketConnection mConnection = new WebSocketConnection();
 
-    /**
-     *
-     * @param getVars Http Get variables
-     * @param getRequest Http Get variable values
-     * @return Http Get response
-     */
-    public static String HttpGet(String[] getVars, String[] getRequest) {
-        URL url;
-        HttpURLConnection urlConnection = null;
-        String response = "";
+    private static final Object mLock = new Object();
+    private static final Object mLockConnection = new Object();
+
+    private static String[] mAccounts;
+
+    private static boolean mConnectionEstablished = false;
+
+    public static void init(Context context) {
+
         try {
-            String urlString = "http://" + SERVER_IP + "/" + SERVER_PHP_PAGE;
-            for (int i = 0; i < getVars.length; i++) {
-                if (i == 0) {
-                    urlString += "?";
-                } else {
-                    urlString += "&";
+            mConnection.connect(WS_URI, new WebSocketHandler() {
+
+                @Override
+                public void onOpen() {
+                    Log.d(TAG, "Status: Connected to " + WS_URI);
+                    synchronized (mLockConnection) {
+                        mConnectionEstablished = true;
+                        mLockConnection.notifyAll();
+                    }
                 }
-                urlString += getVars[i] + "=" + getRequest[i];
-            }
-            url = new URL(urlString);
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Key", KEY);
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            response = convertStreamToString(in);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            response = "ERROR:MalformedURLException";
-        } catch (IOException e) {
-            e.printStackTrace();
-            response = "ERROR:IOException";
-        } finally {
-            if (urlConnection != null) urlConnection.disconnect();
-        }
-        return response;
-    }
 
-    public static String getPokemonInRange(LatLng loc, float range) {
-        String locString = loc.latitude + "_" + loc.longitude;
+                @Override
+                public void onTextMessage(String payload) {
+                    Log.d(TAG, "Got message: " + payload);
+                    if (payload.contains("accounts")) {
+                        accountsReceived(payload.split(" ")[1]);
+                    }
+                }
 
-        URL url;
-        HttpURLConnection urlConnection = null;
-        String response = "";
-        try {
-            String urlString = "http://" + SERVER_IP + "/" + SERVER_PHP_PAGE + "?getlist=1&location=" + locString + "&range=" + Float.toString(range);
-            url = new URL(urlString);
-            urlConnection = (HttpURLConnection)url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Key", KEY);
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            response = convertStreamToString(in);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            response = "ERROR:MalformedURLException";
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-            response = "ERROR:IOException";
-            return null;
-        } finally {
-            if (urlConnection != null) urlConnection.disconnect();
+                @Override
+                public void onClose(int code, String reason) {
+                    Log.d(TAG, "Connection lost.");
+                }
+            });
+        } catch (WebSocketException e) {
+            Log.d(TAG, e.toString());
+            Toast.makeText(context, "Server unreachable. Please try again later", Toast.LENGTH_LONG).show();
         }
-        return response;
+
     }
 
     public static String[] getAccounts(int amount) {
-        URL url;
-        HttpURLConnection urlConnection = null;
-        String[] response;
-        try {
-            String urlString = "http://" + SERVER_IP + "/" + SERVER_PHP_PAGE + "?getaccounts=1&amount=" + amount;
-            url = new URL(urlString);
-            urlConnection = (HttpURLConnection)url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Key", KEY);
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            response = convertStreamToString(in).split(" ");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (urlConnection != null) urlConnection.disconnect();
+        synchronized(mLock) {
+            if (!mConnectionEstablished) {
+                synchronized (mLockConnection) {
+                    try {
+                        mLockConnection.wait();
+                    } catch (InterruptedException e) {}
+                }
+            }
+            mConnection.sendTextMessage("getaccounts " + amount);
+            try {
+                mLock.wait();
+            } catch (InterruptedException e) {}
         }
-        if (response == null) {
-            throw new NullPointerException();
-        }
-        return response;
+        return mAccounts;
     }
 
-    public static void updateAccounts(String[] accounts) {
-        URL url;
-        HttpURLConnection urlConnection = null;
-        try {
-            String a = accounts[0].split(":")[0];
-            for (int i = 1; i < accounts.length; i++) {
-                a += "_" + accounts[i].split(":")[0];
-            }
-            String urlString = "http://" + SERVER_IP + "/" + SERVER_PHP_PAGE + "?updateaccounts=1&accounts=" + a;
-            url = new URL(urlString);
-            urlConnection = (HttpURLConnection)url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Key", KEY);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (urlConnection != null) urlConnection.disconnect();
+    private static void accountsReceived(String payload) {
+        synchronized (mLock) {
+            mAccounts = payload.split(";;");
+            mLock.notifyAll();
         }
     }
 
-    private static String convertStreamToString(InputStream is) {
-        String line;
-        StringBuilder total = new StringBuilder();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-        try {
-            while ((line = rd.readLine()) != null) {
-                total.append(line);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static void updateAccounts(List<String> accounts) {
+        String a = accounts.get(0).split(":")[0];
+        for (int i = 1; i < accounts.size(); i++) {
+            a += ";;" + accounts.get(i).split(":")[0];
         }
-        return total.toString();
+        mConnection.sendTextMessage("updateaccount " + a);
+    }
+
+    public static void setBroken(List<String> accounts) {
+        String a = accounts.get(0).split(":")[0];
+        for (int i = 1; i < accounts.size(); i++) {
+            a += ";;" + accounts.get(i).split(":")[0];
+        }
+        mConnection.sendTextMessage("accountbroken " + a);
     }
 
 }

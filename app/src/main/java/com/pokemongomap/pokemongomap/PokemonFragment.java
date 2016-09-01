@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,14 +61,14 @@ public class PokemonFragment extends Fragment {
                 int diff = (view.getBottom() - (rootView.getHeight() + rootView.getScrollY()));
 
                 if (diff < SCROLL_DIFF) {
-                    for (int i = mPosition; mPosition < (i+5); mPosition++) {
+                    for (int i = mPosition; mPosition < (i+5) && mPosition < 152; mPosition++) {
                         loadPokemon(layout);
                     }
                 }
             }
         });
 
-        for (int i = mPosition; mPosition < (i+9); mPosition++) {
+        for (int i = mPosition; mPosition < (i+9) && mPosition < 152; mPosition++) {
             loadPokemon(layout);
         }
 
@@ -85,12 +86,8 @@ public class PokemonFragment extends Fragment {
     }
 
     private void loadPokemon(RelativeLayout layout) {
-        Pokemon pokemon;
-        try {
-            pokemon = PokemonHelper.getBasePokemon(mPosition);
-        } catch (NullPointerException e) {
-            return;
-        }
+        Pokemon pokemon = PokemonHelper.getBasePokemon(mPosition);
+
         View pokeView = View.inflate(getContext(), R.layout.pokemon_view, null);
 
         // get screen size
@@ -119,7 +116,7 @@ public class PokemonFragment extends Fragment {
         linearView.setLayoutParams(params);
         TextView textView = ((TextView) pokeView.findViewById(R.id.pokemon_name));
         textView.setTextColor(ContextCompat.getColor(getContext(), TypeModifier.getTypeColor(pokemon.getType())));
-        textView.setText("#" + (pokemon.getId()+1) + " " + pokemon.getName());
+        textView.setText("#" + pokemon.getId() + " " + pokemon.getName());
         ViewGroup.LayoutParams layoutParams = textView.getLayoutParams();
         layoutParams.width = width - IMAGE_SIZE;
         textView.setLayoutParams(layoutParams);

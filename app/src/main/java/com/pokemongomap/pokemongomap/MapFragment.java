@@ -30,7 +30,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.pokemongomap.helpers.BitmapHelper;
 import com.pokemongomap.helpers.Constants;
 import com.pokemongomap.pokemon.Pokemon;
-import com.pokemongomap.pokemon.PokemonData;
+import com.pokemongomap.searcher.PokemonData;
 import com.pokemongomap.services.LocationIntentService;
 
 import java.util.Date;
@@ -299,7 +299,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     public void updatePokemon(final Pokemon pokemon, int seconds, final float dim, final double offset) {
         final Marker marker = mCountdowns.get(pokemon);
-        final Bitmap text = BitmapHelper.getBitmap(seconds);
+        final Bitmap text;
+        if (seconds > 900) {
+            text = BitmapHelper.getBitmap(-1);
+        } else {
+            text = BitmapHelper.getBitmap(seconds);
+        }
         if (marker != null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override

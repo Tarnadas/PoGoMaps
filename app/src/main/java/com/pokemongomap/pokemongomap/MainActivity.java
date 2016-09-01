@@ -1,12 +1,9 @@
 package com.pokemongomap.pokemongomap;
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Build;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
@@ -23,7 +20,7 @@ import android.widget.Toast;
 import com.pokemongomap.helpers.BitmapHelper;
 import com.pokemongomap.helpers.Constants;
 import com.pokemongomap.permissions.EasyPermissions;
-import com.pokemongomap.pokemon.PokemonData;
+import com.pokemongomap.searcher.PokemonData;
 import com.pokemongomap.helpers.PokemonHelper;
 import com.pokemongomap.services.LocationService;
 
@@ -104,8 +101,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         DatabaseConnection.init(this);
+        RemoteDatabaseConnection.init(getApplicationContext());
         PokemonHelper.init(getApplicationContext());
-        PokemonData.init(getApplicationContext());
+        PokemonData.init(getApplicationContext(), this);
         BitmapHelper.init();
 
         if (savedInstanceState == null) {
